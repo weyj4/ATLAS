@@ -8,6 +8,7 @@ export default class Main extends React.Component{
 		return(
 			<div style={styles.mapContainer}>
 				<Map style={styles.map}/>
+				<RiskMenu style={styles.riskMenu}/>
 			</div>	
 		)
 	}
@@ -30,7 +31,7 @@ const styles = {
 		position : 'absolute',
 		right : 0,
 		width : '30%',
-		height : '40%',
+		top : 0,
 		bottom : 0,
 		zIndex : 1,
 	},

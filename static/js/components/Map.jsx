@@ -28,10 +28,16 @@ export default class Map extends React.Component{
 		return Math.floor(Math.random() * (max - min)) + min;
 	}
 
+	click = (d) => {
+		var component = this
+		var center = d.target.getBounds().getCenter()
+		console.log(center)
+	}
+
 	render(){
-		const rect = [[51.509, -0.08],    [51.503, -0.06], [51.51, -0.047]]
 		return(
 				<Leaflet.Map 
+					ref='map'
 					id='map'
 					center={[this.state.latitude, this.state.longitude]} 
 					zoom={15}
@@ -57,6 +63,7 @@ export default class Map extends React.Component{
 				    		return(
 				    			<Leaflet.Polygon
 					    			key={i}
+					    			onClick={this.click}
 					    			weight={2}
 					    			color={this.mkColor(p.index)}
 					    			fillColor={this.mkColor(p.index)}
