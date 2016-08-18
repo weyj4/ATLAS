@@ -1,6 +1,7 @@
 import React from 'react';
 import MapGL from 'react-map-gl'
 import * as Leaflet from 'react-leaflet';
+import {TRACTS} from '../data/census_tracts/new_york/new_york';
 var _ = require('underscore')
 
 export default class Map extends React.Component{
@@ -13,9 +14,22 @@ export default class Map extends React.Component{
 		}
 	}
 
-	render(){
-		const rect = [[40.7818, -73.9525], [40.79, -73.9425]]
+	mkColor = (index) => {
+		switch(index){
+			case 0: return 'red';
+			case 1: return 'blue';
+			case 2: return 'green';
+		}
+	}
 
+	getRandomInt(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min)) + min;
+	}
+
+	render(){
+		const rect = [[51.509, -0.08],    [51.503, -0.06], [51.51, -0.047]]
 		return(
 				<Leaflet.Map 
 					id='map'
@@ -28,9 +42,29 @@ export default class Map extends React.Component{
 						url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
 				    	attribution='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
 				    />
-				    <Leaflet.Rectangle
-				    	bounds={rect}
-				    />
+				    {
+				    	TRACTS.features.map((p, i) => {
+				    		var bounds = p.geometry.coordinates[0]
+				    		// Shape files come lng,lat but we need them swapped
+				    		for(var j = 0; j < bounds.length; j++){
+				    			var temp = bounds[j][0]
+				    			bounds[j][0] = bounds[j][1];
+				    			bounds[j][1] = temp;
+				    		}
+
+				    		// fake data for now...
+				    		p.index = this.getRandomInt(0, 3)
+				    		return(
+				    			<Leaflet.Polygon
+					    			key={i}
+					    			weight={2}
+					    			color={this.mkColor(p.index)}
+					    			fillColor={this.mkColor(p.index)}
+					    			positions={bounds}
+					    		/>
+				    		)
+				    	})
+				    }
 				</Leaflet.Map>
 		)
 	}

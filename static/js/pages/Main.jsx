@@ -8,7 +8,6 @@ export default class Main extends React.Component{
 		return(
 			<div style={styles.mapContainer}>
 				<Map style={styles.map}/>
-				<RiskMenu style={styles.riskMenu}/>
 			</div>	
 		)
 	}
