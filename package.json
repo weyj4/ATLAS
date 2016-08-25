@@ -29,6 +29,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "brfs": "^1.4.3",
     "cors": "^2.7.1",
+    "d3": "^4.2.2",
     "dotenv": "^2.0.0",
     "json-loader": "^0.5.4",
     "leaflet": "^0.7.7",
