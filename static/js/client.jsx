@@ -5,6 +5,8 @@ import {Router, Route, IndexRoute, hashHistory, IndexRedirect} from 'react-route
 import Layout from './Layout';
 import Main from './pages/Main';
 
+import 'react-select/dist/react-select.css';
+
 const app = document.getElementById('app');
 
 ReactDOM.render(
