@@ -9,6 +9,10 @@ var L = require('leaflet')
 // Display POP10 if risk_zone == 1
 // same for cold spot data
 
+const TILE_URL = process.env.NODE_ENV === 'production' ? 
+				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com/test_layer/{z}/{x}/{y}.geojson' :
+				'http://localhost:8080/test_layer/{z}/{x}/{y}.geojson'
+
 export default class Map extends React.Component{
 
 	constructor(){
@@ -62,7 +66,7 @@ export default class Map extends React.Component{
 		                    tile.xhr = null;
 		                    tile.nodes = d3.select(self.map._container)
 		                    				.select("svg")
-		                    				.style('opacity', '0.2')
+		                    				.style('opacity', '0.3')
 		                    				.append("g")
 
 		                    tile.nodes.selectAll("path")
@@ -70,7 +74,6 @@ export default class Map extends React.Component{
 		                      .append("path")
 		                        .attr("d", self._path)
 		                        .style('stroke', '#000000')
-		                        .style('fill-opacity', '0.2')
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
 		                        	return palette(d.properties.pop10)
@@ -85,11 +88,10 @@ export default class Map extends React.Component{
 	componentDidMount(){
 		var map = this.refs.map.leafletElement;
 		map._initPathRoot();
-		var url = 'http://localhost:8082/test_layer/{z}/{x}/{y}.geojson'
 		// Add a fake GeoJSON line to coerce Leaflet into creating the <svg> tag that d3_geoJson needs
 		new L.geoJson({"type": "LineString","coordinates":[[0,0],[0,0]]}).addTo(map);
 
-		this.polyLayer = new L.TileLayer.d3_topoJSON(url, {layerName : 'blocks'}).addTo(map);
+		this.polyLayer = new L.TileLayer.d3_topoJSON(TILE_URL, {layerName : 'blocks'}).addTo(map);
 	}
 
 	render(){
