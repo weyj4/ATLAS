@@ -61,8 +61,8 @@ app.get('/test_layer/:z/:x/:y.geojson', function(req, res){
 })
 
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 8082;
-var ip = process.env.OPENSHIFT_NODEJS_IP || "localhost";
+var port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 8080;
+var ip = process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
 
 
 app.listen(port, ip, function (err) {
