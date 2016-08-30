@@ -6,10 +6,18 @@ var request = require('request')
 var cors = require('cors')
 var util = require('util')
 var SphericalMercator = require('sphericalmercator');
+var _ = require('underscore')
 
-//TODO set up openshift database (or AWS)
-var db = new pg.Client(process.env.OPENSHIFT_POSTGRESQL_DB_URL ? 
-                       process.env.OPENSHIFT_POSTGRESQL_DB_URL : {database : 'atlas'});
+
+var config = _.extend({database : 'atlas'}, process.env.AWS_IP ? {
+    user : process.env.DB_USER,
+    password : process.env.DB_PASSWORD,
+    host : process.env.AWS_IP,
+    port : +process.env.DB_PORT
+} : {})
+
+var db = new pg.Client(config)
+
 db.connect();
 
 var app = express()
@@ -47,6 +55,8 @@ app.get('/test_layer/:z/:x/:y.geojson', function(req, res){
         }
         console.log('Serving ' + data.rows.length + ' polygons')
         res.json({type : 'FeatureCollection', features : data.rows})
+    }).catch(function(err){
+        console.log(err)
     })
 })
 
