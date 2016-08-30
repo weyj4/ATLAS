@@ -1,5 +1,4 @@
 import React from 'react';
-import MapGL from 'react-map-gl'
 import * as Leaflet from 'react-leaflet';
 import topojson from 'topojson'
 var _ = require('underscore')
