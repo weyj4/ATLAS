@@ -12,6 +12,7 @@ module.exports = {
   resolve: {
     extensions: ['', '.js', '.jsx'],
     alias: {
+      atlas : path.resolve(__dirname + '/static/js'),
       webworkify: 'webworkify-webpack'
     }
   },

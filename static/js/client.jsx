@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {Router, Route, IndexRoute, hashHistory, IndexRedirect} from 'react-router';
 
-import Layout from './Layout';
-import Main from './pages/Main';
+import Layout from 'atlas/Layout';
+import Main from 'atlas/pages/Main';
 
 import 'react-select/dist/react-select.css';
 

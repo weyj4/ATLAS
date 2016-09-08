@@ -1,6 +1,6 @@
 import React from 'react'
-import Map from '../components/Map';
-import RiskMenu from '../components/RiskMenu'
+import Map from 'atlas/components/Map';
+import RiskMenu from 'atlas/components/RiskMenu'
 
 export default class Main extends React.Component{
 
