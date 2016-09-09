@@ -13,7 +13,28 @@ const TILE_URL = process.env.NODE_ENV === 'production' ?
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com/test_layer/{z}/{x}/{y}.geojson' :
 				'http://localhost:8080/test_layer/{z}/{x}/{y}.geojson'
 
+// See `get_top_20.m` and `index.js` in `zika_risk_map/compute_density`
+// for more details on how this constant was computed
+const POP_CUTOFF=2.1647
+
+
 export default class Map extends React.Component{
+
+	// Filter `features` without generating any garbage
+	filterPolygons(polygons, geoJson){
+		var j = 0;
+		for(var i = 0; i < geoJson.features.length; i++){
+        	if(!polygons[geoJson.features[i].gid] && 
+        	   !(!geoJson.features[i].properties.zika_risk && 
+        	   	 geoJson.features[i].properties.pop_per_sq_km < POP_CUTOFF)){
+        		console.log('Adding polygon')
+        		polygons[geoJson.features[i].gid] = true;
+        		geoJson.features[j] = geoJson.features[i];
+        		j++;
+        	}
+        }
+        geoJson.features.length = j;
+	}
 
 	constructor(){
 		super()
@@ -39,6 +60,7 @@ export default class Map extends React.Component{
 		            return [point.x,point.y];
 		        });
 		        this.on("tileunload",function(d) {
+		        	polygons = {}
 		            if (d.tile.xhr) d.tile.xhr.abort();
 		            if (d.tile.nodes) d.tile.nodes.remove();
 		            d.tile.nodes = null;
@@ -54,7 +76,6 @@ export default class Map extends React.Component{
 		                if (error) {
 		                    console.log(error);
 		                } else {
-
 		                	// range of population data
         			        var range = [1, 6397];
 
@@ -66,17 +87,31 @@ export default class Map extends React.Component{
 		                    tile.xhr = null;
 		                    tile.nodes = d3.select(self.map._container)
 		                    				.select("svg")
-		                    				.style('opacity', '0.3')
 		                    				.append("g")
+
+		                    component.filterPolygons(polygons, geoJson)
+		                    
 
 		                    tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
 		                        .attr("d", self._path)
 		                        .style('stroke', '#000000')
+		                        .style('fill-opacity', 0.4)
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
-		                        	return palette(d.properties.pop10)
+		                        	polygons[d.gid] = true
+		                        	if(d.properties.zika_risk){
+		                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
+		                        			return 'red';
+		                        		}else{
+		                        			return 'orange';
+		                        		}
+		                        	}else{
+		                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
+		                        			return 'blue'
+		                        		}
+		                        	}
 		                        })
 		                }
 		            });
