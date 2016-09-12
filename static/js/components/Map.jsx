@@ -24,10 +24,7 @@ export default class Map extends React.Component{
 	filterPolygons(polygons, geoJson){
 		var j = 0;
 		for(var i = 0; i < geoJson.features.length; i++){
-        	if(!polygons[geoJson.features[i].gid] && 
-        	   !(!geoJson.features[i].properties.zika_risk && 
-        	   	 geoJson.features[i].properties.pop_per_sq_km < POP_CUTOFF)){
-        		console.log('Adding polygon')
+        	if(!polygons[geoJson.features[i].gid]){
         		polygons[geoJson.features[i].gid] = true;
         		geoJson.features[j] = geoJson.features[i];
         		j++;
@@ -91,13 +88,18 @@ export default class Map extends React.Component{
 
 		                    component.filterPolygons(polygons, geoJson)
 		                    
-
 		                    tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
 		                        .attr("d", self._path)
 		                        .style('stroke', '#000000')
-		                        .style('fill-opacity', 0.4)
+		                        .style('fill-opacity', (d) => {
+		                        	if(!d.properties.zika_risk && d.properties.pop_per_sq_km < POP_CUTOFF){
+		                        		return 0.0 //add polygon, but make it invisible.  This way we can create a popup
+		                        	}else{
+		                        		return 0.4;
+		                        	}
+		                        })
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
@@ -112,7 +114,15 @@ export default class Map extends React.Component{
 		                        			return 'blue'
 		                        		}
 		                        	}
-		                        })
+		                        }).on('mousemove', (d, i, children) => {
+				                    var mouse = d3.mouse(document.body);
+				                    var chromeIsDumb = component;
+				                    component.tooltip.classed('hidden', false)
+				                        .attr('style', 'left:' + (mouse[0] + 15) +
+				                                'px; top:' + (mouse[1] - 35) + 'px')
+				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>Zika Risk: ${d.properties.zika_risk}`);
+				                })
+				                .on('mouseout', () => component.tooltip.classed('hidden', true))
 		                }
 		            });
 		        }
@@ -127,6 +137,11 @@ export default class Map extends React.Component{
 		new L.geoJson({"type": "LineString","coordinates":[[0,0],[0,0]]}).addTo(map);
 
 		this.polyLayer = new L.TileLayer.d3_topoJSON(TILE_URL, {layerName : 'blocks'}).addTo(map);
+
+		this.tooltip = d3.select(this.refs.map.leafletElement._container).append('div')
+            	.attr('class', 'hidden tooltip')
+            	.attr('id', 'tooltip');
+        console.log('Added tooltip')
 	}
 
 	render(){
