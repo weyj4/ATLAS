@@ -8,7 +8,6 @@ var util = require('util')
 var SphericalMercator = require('sphericalmercator');
 var _ = require('underscore')
 
-
 var config = _.extend({database : 'atlas'}, process.env.AWS_IP ? {
     user : process.env.DB_USER,
     password : process.env.DB_PASSWORD,
@@ -22,6 +21,9 @@ db.connect();
 
 var app = express()
 app.use(cors());
+
+// Serve static files from the Node.js server for now...
+app.use(express.static(__dirname + '/../static/'));
 
 var projection = new SphericalMercator({
     size: 256
@@ -44,14 +46,13 @@ FROM polygons as p INNER JOIN florida_zika as f ON p.blockid10=f.blockid10 WHERE
 
     //console.log(q)
     db.query(q).then(function(data){
-        features = data.rows.length > 0 ? data.rows[0].array_to_json : [];
+        var features = data.rows[0].array_to_json ? data.rows[0].array_to_json : [];
         console.log('Serving ' + features.length + ' polygons');
         res.json({type : 'FeatureCollection', features : features})
     }).catch(function(err){
         console.log(err)
     })
 })
-
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 8080;
 var ip = process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
@@ -61,5 +62,5 @@ app.listen(port, ip, function (err) {
     if (err) {
         return console.error(err);
     }
-    console.log('Listening at http://localhost:8082');
+    console.log(`Listening at http://${ip}:${port}`);
 });
