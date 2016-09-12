@@ -91,7 +91,7 @@ export default class RiskMenu extends React.Component{
 					</Measure>	
 				</div>
 			*/}
-				
+				{/*
 				<div style={{display : 'table', position : 'relative', top : 30, margin : '0 auto', width : '100%', height : 20}}>
 						<div style={{display : 'table-row'}}>
 							<div style={{display : 'table-cell', textAlign : 'center'}}>Low</div>
@@ -104,8 +104,23 @@ export default class RiskMenu extends React.Component{
 						</div>
 				</div>
 
-				<div style={{height : 30}}/>
+				<div style={{height : 30}}/>*/}
 
+
+				<div style={{position : 'relative', margin : '0 auto', top : 30, width : '100%', height : 20}}>
+					<div style={{width : '100%', display : 'table'}}>
+						<div style={{display : 'table-row'}}>
+							<div style={{display : 'table-cell', textAlign : 'center'}}>Low</div>
+							{
+								['blue', 'orange', 'red'].map((c) => 
+									<div key={c} style={_.extend({}, styles.cell, {color : c, backgroundColor : c})}>
+									</div>
+								)
+							}
+							<div style={{display : 'table-cell', textAlign : 'center'}}>High</div>
+						</div>
+					</div>
+				</div>
 
 				{
 				/*
@@ -141,7 +156,7 @@ export default class RiskMenu extends React.Component{
 
 const styles = {
 	cell : {
-			height : 20,
+			height : 30,
 			width : '20%',
 			display : 'table-cell',
 			opacity : 0.5,
