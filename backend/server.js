@@ -41,7 +41,7 @@ ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
 
     var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
 (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
-json_build_object('zika_risk', zika_risk, 'pop_per_sq_km', pop_per_sq_km) as properties
+json_build_object('zika_risk', zika_risk, 'pop_per_sq_km', pop_per_sq_km, 'care_delivery', care_delivery) as properties
 FROM polygons as p INNER JOIN florida_zika as f ON p.blockid10=f.blockid10 WHERE ST_Intersects(geom, ${tile.bbox_4326}))feature;`
 
     //console.log(q)

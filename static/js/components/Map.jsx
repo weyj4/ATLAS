@@ -93,34 +93,30 @@ export default class Map extends React.Component{
 		                      .append("path")
 		                        .attr("d", self._path)
 		                        .style('stroke', '#000000')
-		                        .style('fill-opacity', (d) => {
-		                        	if(!d.properties.zika_risk && d.properties.pop_per_sq_km < POP_CUTOFF){
-		                        		return 0.0 //add polygon, but make it invisible.  This way we can create a popup
-		                        	}else{
-		                        		return 0.4;
-		                        	}
-		                        })
+		                        .style('fill-opacity', 0.4)
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
 		                        	if(d.properties.zika_risk){
-		                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
-		                        			return 'red';
-		                        		}else{
-		                        			return 'orange';
-		                        		}
-		                        	}else{
-		                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
-		                        			return 'blue'
+		                        		if(!d.properties.care_delivery){
+			                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
+			                        			return 'red'; //level 1
+			                        		}else{
+			                        			return 'orange'; // level 2
+			                        		}
 		                        		}
 		                        	}
+		                        	if(!d.properties.care_delivery && !d.properties.zika_risk && d.properties.pop_per_sq_km >= POP_CUTOFF){
+		                        		return 'yellow'; // level 3
+		                        	}
+		                        	return 'lightgray';
 		                        }).on('mousemove', (d, i, children) => {
 				                    var mouse = d3.mouse(document.body);
 				                    var chromeIsDumb = component;
 				                    component.tooltip.classed('hidden', false)
 				                        .attr('style', 'left:' + (mouse[0] + 15) +
 				                                'px; top:' + (mouse[1] - 35) + 'px')
-				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>Zika Risk: ${d.properties.zika_risk}`);
+				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}`);
 				                })
 				                .on('mouseout', () => component.tooltip.classed('hidden', true))
 		                }

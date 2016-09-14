@@ -106,7 +106,26 @@ export default class RiskMenu extends React.Component{
 
 				<div style={{height : 30}}/>*/}
 
+				<table style={{position : 'relative', 'margin' : '0 auto', top : 30, width : '90%'}}>
+					<tbody>
+						{
+							[{color : 'red', msg : 'Level 1 Cold Spot'}, {color : 'orange', msg : 'Level 2 Cold Spot'},
+							 {color : 'yellow', msg : 'Level 3 Cold Spot'}, {color : 'lightgray', msg : 'Stable'}].map((elem) => 
+							 	<tr key={elem.color}>
+							 		<td style={{paddingBottom : '1em'}}>
+										<div style={_.extend({}, styles.cell, {color : elem.color, backgroundColor : elem.color})}></div>
+									</td>
+									<td style={{align : 'left', paddingBottom : '1em'}}>
+										{elem.msg}
+									</td>
+							 	</tr>
+							 )
 
+						}
+					</tbody>
+				</table>
+
+				{/*
 				<div style={{position : 'relative', margin : '0 auto', top : 30, width : '100%', height : 20}}>
 					<div style={{width : '100%', display : 'table'}}>
 						<div style={{display : 'table-row'}}>
@@ -120,7 +139,7 @@ export default class RiskMenu extends React.Component{
 							<div style={{display : 'table-cell', textAlign : 'center'}}>High</div>
 						</div>
 					</div>
-				</div>
+				</div>*/}
 
 				{
 				/*
@@ -156,9 +175,9 @@ export default class RiskMenu extends React.Component{
 
 const styles = {
 	cell : {
-			height : 30,
-			width : '20%',
-			display : 'table-cell',
+			height : 40,
+			width : 40,
+//			display : 'table-cell',
 			opacity : 0.5,
 		}
 }
