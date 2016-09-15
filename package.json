@@ -28,6 +28,7 @@
     "immutable": "^3.8.1",
     "leaflet": "^0.7.7",
     "pg": "^6.1.0",
+    "polylabel": "^1.0.1",
     "react": "^15.3.0",
     "react-bootstrap": "^0.30.2",
     "react-leaflet": "^0.12.1",
@@ -39,6 +40,7 @@
     "style-loader": "^0.13.1",
     "topojson": "^1.6.26",
     "transform-loader": "^0.2.3",
+    "turf": "^3.0.14",
     "util": "^0.10.3",
     "webpack": "^1.13.1"
   },

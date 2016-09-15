@@ -24,8 +24,9 @@ const styles = {
 		zIndex : 0,
 	},
 	map : {
-		width : '100%',
-		height : '100%'
+		width : '70%',
+		height : '100%',
+		position : 'relative'
 	},
 	riskMenu : {
 		position : 'absolute',

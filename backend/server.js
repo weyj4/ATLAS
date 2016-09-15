@@ -7,6 +7,7 @@ var cors = require('cors')
 var util = require('util')
 var SphericalMercator = require('sphericalmercator');
 var _ = require('underscore')
+var turf = require('turf')
 
 var config = _.extend({database : 'atlas'}, process.env.AWS_IP ? {
     user : process.env.DB_USER,
@@ -28,6 +29,17 @@ app.use(express.static(__dirname + '/../static/'));
 var projection = new SphericalMercator({
     size: 256
 });
+
+app.get('/HighestRisk', function(req, res){
+    var query = `SELECT ST_AsGeoJSON(geom)::json as geometry FROM polygons WHERE polygons.blockid10=
+                 (SELECT blockid10 FROM florida_zika WHERE care_delivery=False AND zika_risk=true
+                  ORDER BY pop_per_sq_km DESC LIMIT 1);`
+    db.query(query).then(function(result){
+        var geometry = result.rows[0].geometry
+        var centroid = turf.centroid(geometry)
+        res.json(centroid.geometry.coordinates)
+    })
+})
 
 app.get('/test_layer/:z/:x/:y.geojson', function(req, res){
 
