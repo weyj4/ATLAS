@@ -1,5 +1,8 @@
 import React from 'react';
 import {Link} from 'react-router';
+import * as BS from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
+
 
 
 export default class Nav extends React.Component{
@@ -7,74 +10,37 @@ export default class Nav extends React.Component{
 	constructor(){
 		super()
 		this.state = {
-			showMenu : false,
-			routes : [
-				{to : "settings", label : 'Settings', key : 0},
-				{to : "contact", label : 'Contact', key : 1},
-				{to : "about", label : 'About', key : 2},
-
-			]
+			active : 2
 		}
 	}
 
-	chooseColor = (idx) => idx % 2 == 0 ? 'gray' : '#A9A9A9'
+
+	onSelect = (event) => {
+		this.setState({active : event})
+	}
 
 	render(){
 		return(
-			<div>
-				<div style={styles.bar}>
-					<a onClick={() => this.setState({showMenu : !this.state.showMenu})} 
-					   			href="#" style={styles.dropdownIcon}>
-						&#x2630;
-					</a>
-				</div>
-				<div style={styles.menu}>
-				{
-					this.state.showMenu ? 
-					this.state.routes.map((route, idx) => 
-						<div key={route.key} style={{backgroundColor : this.chooseColor(idx), width: 150, height : '100%'}}>
-							<Link to={route.to} style={styles.menuItem}>
-								<p style={{textAlign : 'center'}}>{route.label}</p>
-							</Link>
-						</div>
-					) : undefined
-				}
-				</div>
-			</div>
+			<BS.Navbar style={{marginBottom : 0}}>
+				<BS.Navbar.Brand>
+		          <a href="#">ATLAS</a>
+		        </BS.Navbar.Brand>
+
+		        <BS.Nav activeKey={this.state.active} onSelect={this.onSelect}>
+		          <LinkContainer to="/landing-page">
+		            <BS.NavItem eventKey={1}>
+		              Home
+		            </BS.NavItem>
+		          </LinkContainer>
+		          <LinkContainer to="/main">
+		            <BS.NavItem eventKey={2}>
+		              Risk Map
+		            </BS.NavItem>
+		          </LinkContainer>
+		        </BS.Nav>
+		      </BS.Navbar>
 		)
 	}
 }
-
-const styles = {
-	bar : {
-		backgroundColor : 'black',
-		position : 'absolute',
-		left : 0,
-		right : 0,
-		height : 75,
-	},
-	dropdownIcon : {
-		position : 'absolute',
-		fontSize : '300%',
-		color : 'white',
-		left : 20,
-		textDecoration : 'none',
-	},
-	menuItem : {
-		color : 'white',
-		fontSize : '150%',
-		textDecoration : 'none',
-	},
-	menu : {
-		position : 'absolute',
-		left : 0,
-		top : 75,
-		zIndex  : 1,
-		padding : 0,
-		margin : 0,
-	}
-}
-
-
 
 

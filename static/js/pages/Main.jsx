@@ -16,12 +16,8 @@ export default class Main extends React.Component{
 
 const styles = {
 	mapContainer : {
-		position : 'absolute',
-		top : 75,
-		left : 0,
-		bottom : 0,
-		right : 0,
-		zIndex : 0,
+		height : '100%',
+		width : '100%',
 	},
 	map : {
 		width : '70%',
