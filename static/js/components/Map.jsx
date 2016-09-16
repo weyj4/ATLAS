@@ -9,10 +9,6 @@ var _ = require('underscore')
 var d3 = require('d3')
 var L = require('leaflet')
 
-// For zika.json:
-// Display POP10 if risk_zone == 1
-// same for cold spot data
-
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
 				'http://localhost:8080'
@@ -121,15 +117,16 @@ export default class Map extends React.Component{
 				                    var point = new L.Point(mouse[1], mouse[0]);
 				                    var coords = component.refs.map.leafletElement.layerPointToLatLng(point)
 
-				                    var chromeIsDumb = component;
-				                    component.tooltip.classed('hidden', false)
+				                    component.tooltip.classed('polygon', true)
 				                        .attr('style', 'left:' + (mouse[0] + 15) +
 				                                'px; top:' + (mouse[1] - 35) + 'px')
 				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
 				                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
 				                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`);
+
+				                }).on('mouseout', (d) => {
+				                	component.tooltip.classed('polygon', false)
 				                })
-				                .on('mouseout', () => component.tooltip.classed('hidden', true))
 		                }
 		            });
 		        }
@@ -140,6 +137,23 @@ export default class Map extends React.Component{
 	componentDidMount(){
 		var map = this.refs.map.leafletElement;
 		map._initPathRoot();
+
+		var component = this;
+
+		map.on('mousemove', function(d){
+			component.tooltip.classed('hidden', false)
+			if(!component.tooltip.classed('polygon')){
+				component.tooltip.classed('hidden', false)
+					.attr('style', 'left:' + (d.originalEvent.screenX) +
+	                        'px; top:' + (d.originalEvent.screenY-115) + 'px')
+	                .html('No Data!');
+            }
+		})
+
+		map.on('mouseout', function(d){
+			component.tooltip.classed('hidden', false)
+		})
+
 		// Add a fake GeoJSON line to coerce Leaflet into creating the <svg> tag that d3_geoJson needs
 		new L.geoJson({"type": "LineString","coordinates":[[0,0],[0,0]]}).addTo(map);
 
