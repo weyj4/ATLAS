@@ -94,7 +94,7 @@ export default class Map extends React.Component{
 		                      .append("path")
 		                        .attr("d", self._path)
 		                        .style('stroke', '#000000')
-		                        .style('fill-opacity', 0.4)
+		                        .style('fill-opacity', 0.2)
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
 		                        	var getPole = polylabel;
