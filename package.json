@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/karma/bin/karma start test/karma.conf.js --browsers Firefox --single-run --no-auto-watch",
     "start": "node backend/server.js",
-    "dev": "./node_modules/.bin/webpack-dev-server --content-base static --inline --hot --port 8081"
+    "dev": "./node_modules/.bin/webpack-dev-server --content-base static --inline --hot --port 8081",
+    "build": "NODE_ENV=production webpack"
   },
   "repository": {
     "type": "git",
@@ -39,7 +40,7 @@
     "react-select": "^1.0.0-beta14",
     "sphericalmercator": "^1.0.5",
     "style-loader": "^0.13.1",
-    "topojson": "^1.6.26",
+    "topojson": "^1.6.27",
     "transform-loader": "^0.2.3",
     "turf": "^3.0.14",
     "util": "^0.10.3",
