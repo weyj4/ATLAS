@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/ArnholdInstitute/ATLAS#readme",
   "dependencies": {
-    "brfs": "^1.4.3",
     "cors": "^2.7.1",
     "css-loader": "^0.24.0",
     "d3": "^3.5.17",

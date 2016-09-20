@@ -39,18 +39,8 @@ module.exports = {
       {
         test: /\.css$/,
         loader: "style-loader!css-loader"
-      },
-      {
-        test: /mapbox-gl.+\.js$/,
-        include: path.resolve(__dirname + '/node_modules/mapbox-gl-shaders/index.js'),
-        loader: 'transform/cacheable?brfs'
-      },
-    ],
-    postLoaders: [{
-      include: /node_modules\/mapbox-gl-shaders/,
-      loader: 'transform',
-      query: 'brfs'
-    }]    
+      }
+    ]    
   },
   output: {
     path: __dirname + '/static/',
