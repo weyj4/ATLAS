@@ -3,166 +3,41 @@ import * as Leaflet from 'react-leaflet';
 import topojson from 'topojson'
 import {Button} from 'react-bootstrap';
 import polylabel from 'polylabel';
-
-
-var _ = require('underscore')
-var d3 = require('d3')
-var L = require('leaflet')
+import LayerStore from 'atlas/stores/LayerStore';
+import VectorLayer from 'atlas/components/VectorLayer';
+import L from 'leaflet'
+import d3 from 'd3';
+import _ from 'underscore';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
 				'http://localhost:8080'
 
-const TILE_URL = `${BACKEND_URL}/test_layer/{z}/{x}/{y}.geojson`
-
-// See `get_top_20.m` and `index.js` in `zika_risk_map/compute_density`
-// for more details on how this constant was computed
-const POP_CUTOFF=2.1647
+const DG_API_KEY='pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
 
 export default class Map extends React.Component{
 
-	// Filter `features` without generating any garbage
-	filterPolygons(polygons, geoJson){
-		var j = 0;
-		for(var i = 0; i < geoJson.features.length; i++){
-        	if(!polygons[geoJson.features[i].gid]){
-        		polygons[geoJson.features[i].gid] = true;
-        		geoJson.features[j] = geoJson.features[i];
-        		j++;
-        	}
-        }
-        geoJson.features.length = j;
+	updateLayerState = () => {
+		this.setState(_.extend({}, this.state, {
+			showLayer : LayerStore.getLayerStatus()
+		}))
 	}
+
+	componentWillMount() {
+        LayerStore.on('change', this.updateLayerState);
+	}
+
+    componentWillUnmount () {
+    	LayerStore.removeListenter('change', this.updateLayerState)
+    }
 
 	constructor(){
 		super()
 		this.state = {
 			latitude : 29.367493,
 			longitude : -82.003767,
+			showLayer : LayerStore.getLayerStatus(),
 		}
-
-		/* http://bl.ocks.org/wboykinm/7393674
-		 * Experimental vector tile layer for Leaflet
-		 * Uses D3 to render TopoJSON. Derived from a GeoJSON thing that was
-		 * Originally by Ziggy Jonsson: http://bl.ocks.org/ZJONSSON/5602552
-		 * Reworked by Nelson Minar: http://bl.ocks.org/NelsonMinar/5624141
-		 */
-		var component = this;
-		var polygons = {}
-		L.TileLayer.d3_topoJSON =  L.TileLayer.extend({
-		    onAdd : function(map) {
-		        L.TileLayer.prototype.onAdd.call(this,map);
-		        this.map = map;
-		        this._path = d3.geo.path().projection(function(d) {
-		            var point = map.latLngToLayerPoint(new L.LatLng(d[1],d[0]));
-		            return [point.x,point.y];
-		        });
-		        this.on("tileunload",function(d) {
-		        	polygons = {}
-		            if (d.tile.xhr) d.tile.xhr.abort();
-		            if (d.tile.nodes) d.tile.nodes.remove();
-		            d.tile.nodes = null;
-		            d.tile.xhr = null;
-		        });
-		    },
-		    _loadTile : function(tile,tilePoint) {
-		        var self = this;
-		        this._adjustTilePoint(tilePoint);
-
-		        if (!tile.nodes && !tile.xhr) {
-		            tile.xhr = d3.json(this.getTileUrl(tilePoint),function(error, geoJson) {
-		                if (error) {
-		                    console.log(error);
-		                } else {
-		                	// range of population data
-        			        var range = [1, 6397];
-
-					        var palette = d3.scale.linear()
-					        		.domain(range)
-					        		.interpolate(d3.interpolateRgb)
-					        		.range(['blue', 'red'])
-
-		                    tile.xhr = null;
-		                    tile.nodes = d3.select(self.map._container)
-		                    				.select("svg")
-		                    				.append("g")
-
-		                    component.filterPolygons(polygons, geoJson)
-		                    
-		                    tile.nodes.selectAll("path")
-		                        .data(geoJson.features).enter()
-		                      .append("path")
-		                        .attr("d", self._path)
-		                        .style('stroke', '#000000')
-		                        .style('fill-opacity', 0.2)
-		                        .style("stroke-width", "1.5px")
-		                        .style('fill', (d) => {
-		                        	var getPole = polylabel;
-		                        	polygons[d.gid] = true
-		                        	if(d.properties.zika_risk){
-		                        		if(!d.properties.care_delivery){
-			                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
-			                        			return 'red'; //level 1
-			                        		}else{
-			                        			return 'orange'; // level 2
-			                        		}
-		                        		}
-		                        	}
-		                        	if(!d.properties.care_delivery && !d.properties.zika_risk && d.properties.pop_per_sq_km >= POP_CUTOFF){
-		                        		return 'yellow'; // level 3
-		                        	}
-		                        	return 'lightgray';
-		                        }).on('mousemove', (d, i, children) => {
-				                    var mouse = d3.mouse(document.body);
-				                    var point = new L.Point(mouse[1], mouse[0]);
-				                    var coords = component.refs.map.leafletElement.layerPointToLatLng(point)
-
-				                    component.tooltip.classed('polygon', true)
-				                        .attr('style', 'left:' + (mouse[0] + 15) +
-				                                'px; top:' + (mouse[1] - 35) + 'px')
-				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
-				                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
-				                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`);
-
-				                }).on('mouseout', (d) => {
-				                	component.tooltip.classed('polygon', false)
-				                })
-		                }
-		            });
-		        }
-		    }
-		});
-	}
-
-	componentDidMount(){
-		var map = this.refs.map.leafletElement;
-		map._initPathRoot();
-
-		var component = this;
-
-		map.on('mousemove', function(d){
-			component.tooltip.classed('hidden', false)
-			if(!component.tooltip.classed('polygon')){
-				component.tooltip.classed('hidden', false)
-					.attr('style', 'left:' + (d.originalEvent.screenX) +
-	                        'px; top:' + (d.originalEvent.screenY-115) + 'px')
-	                .html('No Data!');
-            }
-		})
-
-		map.on('mouseout', function(d){
-			component.tooltip.classed('hidden', false)
-		})
-
-		// Add a fake GeoJSON line to coerce Leaflet into creating the <svg> tag that d3_geoJson needs
-		new L.geoJson({"type": "LineString","coordinates":[[0,0],[0,0]]}).addTo(map);
-
-		this.polyLayer = new L.TileLayer.d3_topoJSON(TILE_URL, {layerName : 'blocks'}).addTo(map);
-
-		this.tooltip = d3.select(this.refs.map.leafletElement._container).append('div')
-            	.attr('class', 'hidden tooltip')
-            	.attr('id', 'tooltip');
-        console.log('Added tooltip')
 	}
 
 	gotoHighestRisk = (event) => {
@@ -172,7 +47,6 @@ export default class Map extends React.Component{
 			res[1] = res[0];
 			res[0] = temp;
 			this.refs.map.leafletElement.panTo(res)
-			console.log(res)
 		})
 	}
 
@@ -194,10 +68,13 @@ export default class Map extends React.Component{
 					style={{width : '100%', height : '100%'}}
 					scrollWheelZoom={false}
 				>
-					<Leaflet.TileLayer
-						url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-				    	attributio	n='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
-				    />
+				{
+					this.state.showLayer ? <VectorLayer/> : null
+				}
+				<Leaflet.TileLayer
+					url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+			    	attributio	n='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
+			    />
 				</Leaflet.Map>
 			</div>
 		)

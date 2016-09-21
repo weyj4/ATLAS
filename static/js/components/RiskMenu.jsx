@@ -1,16 +1,34 @@
 import React from 'react';
-import {Row, Col} from 'react-bootstrap'
+import {Row, Col, Button} from 'react-bootstrap'
 var _ = require('underscore');
 import Select from 'react-select';
 var d3 = require('d3');
 import Measure from 'react-measure';
+import * as LayerActions from 'atlas/actions/LayerActions';
+import LayerStore from 'atlas/stores/LayerStore';
 
 export default class RiskMenu extends React.Component{
+
+	updateLayerState = () => {
+		this.setState(_.extend({}, this.state, {
+			showLayer : LayerStore.getLayerStatus(),
+		}))
+	}
+
+	componentWillMount() {
+        LayerStore.on('change', this.updateLayerState);
+	}
+
+    componentWillUnmount () {
+    	LayerStore.removeListenter('change', this.updateLayerState)
+    }
+
 	constructor(props){
 		super(props);
 		this.state = {
-			diseases : [{label : 'Dengue', value : 'dengue'}, {label : 'Zika', value : 'zika'}],
-			selectedDisease : {value : 'zika', label : 'Zika'}
+			diseases : [/*{label : 'Dengue', value : 'dengue'}, */ {label : 'Zika', value : 'zika'}],
+			selectedDisease : {value : 'zika', label : 'Zika'},
+			showLayer : LayerStore.getLayerStatus(),
 		}
 	}
 
@@ -20,12 +38,6 @@ export default class RiskMenu extends React.Component{
 		}))
 	}
 
-	clear = () => {
-		const container = this.refs.colorBar;
-		for (const child of Array.from(container.childNodes)) {
-			container.removeChild(child);
-		}
-	}
 
 	drawColorBar = () => {
 		if(this.state.width){
@@ -60,6 +72,7 @@ export default class RiskMenu extends React.Component{
 		}
 	}
 
+	/*
 	componentDidMount(){
 		this.drawColorBar();
 	}
@@ -67,6 +80,11 @@ export default class RiskMenu extends React.Component{
 	componentDidUpdate = () => {
 		this.clear()
 		this.drawColorBar()
+	}*/
+
+	toggleLayer = (event) => {
+		event.target.blur();
+		LayerActions.toggleLayer();
 	}
 
 	render(){
@@ -124,6 +142,14 @@ export default class RiskMenu extends React.Component{
 						}
 					</tbody>
 				</table>
+
+				<div style={{margin : '0 auto', position : 'relative', top : 40, width : '50%'}}>
+					<Button onClick={this.toggleLayer} bsStyle="primary" style={{width : '100%'}}>
+					{	
+						this.state.showLayer ? "Hide Layer" : "Show Layer"
+					}
+					</Button>
+				</div>
 
 				{/*
 				<div style={{position : 'relative', margin : '0 auto', top : 30, width : '100%', height : 20}}>
