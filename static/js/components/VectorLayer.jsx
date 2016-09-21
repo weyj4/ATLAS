@@ -122,14 +122,11 @@ export default class VectorLayer extends MapComponent{
 	}
 
 	componentDidMount(){
-		console.log('Mounting component')
 		var map = this.context.map;
 		map._initPathRoot();
 
 		// Add a fake GeoJSON line to coerce Leaflet into creating the <svg> tag that d3_geoJson needs
 		this.fakeGeoJSON = new L.geoJson({"type": "LineString","coordinates":[[0,0],[0,0]]}).addTo(map);
-
-		console.log(d3.select('svg'))
 
 		this.polyLayer = new L.TileLayer.d3_topoJSON(TILE_URL, {layerName : 'blocks'}).addTo(map);
 

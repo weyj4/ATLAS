@@ -1,11 +1,20 @@
 import React from 'react';
-import {Row, Col, Button} from 'react-bootstrap'
+import {Row, Col, Button, FormControl} from 'react-bootstrap'
 var _ = require('underscore');
 import Select from 'react-select';
 var d3 = require('d3');
 import Measure from 'react-measure';
 import * as LayerActions from 'atlas/actions/LayerActions';
 import LayerStore from 'atlas/stores/LayerStore';
+import * as LocationActions from 'atlas/actions/LocationActions';
+import LocationStore from 'atlas/stores/LocationStore';
+
+const GOOGLE_API_KEY='AIzaSyC1sZH5IVnoDD3GbbfbPt2cWHjFDcDITug';
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete"
+         async defer></script>
+
 
 export default class RiskMenu extends React.Component{
 
@@ -20,7 +29,7 @@ export default class RiskMenu extends React.Component{
 	}
 
     componentWillUnmount () {
-    	LayerStore.removeListenter('change', this.updateLayerState)
+    	LayerStore.removeListenter('change', this.updateLayerState);
     }
 
 	constructor(props){
@@ -72,6 +81,26 @@ export default class RiskMenu extends React.Component{
 		}
 	}
 
+	componentDidMount(){
+		var latLng = LocationStore.getLocation();
+		var radius = 2000; // meters
+		var bounds = new google.maps.Circle({center: latLng, radius: radius}).getBounds();
+		var searchBox = new google.maps.places.SearchBox(this.refs.locInput);
+		searchBox.setBounds(bounds);
+
+		searchBox.addListener('places_changed', function(){
+			var places = searchBox.getPlaces();
+			if(places.length === 0){
+				return;
+			}
+			var loc = places[0].geometry.location;
+			LocationActions.updateLocation({
+				lat : loc.lat(),
+				lng : loc.lng()
+			});
+		})
+	}
+
 	/*
 	componentDidMount(){
 		this.drawColorBar();
@@ -86,7 +115,7 @@ export default class RiskMenu extends React.Component{
 		event.target.blur();
 		LayerActions.toggleLayer();
 	}
-
+	
 	render(){
 		return(
 			<div style={_.extend({}, this.props.style, {backgroundColor : 'white', zIndex : 1})}>
@@ -149,6 +178,16 @@ export default class RiskMenu extends React.Component{
 						this.state.showLayer ? "Hide Layer" : "Show Layer"
 					}
 					</Button>
+				</div>
+
+				<div style={{margin : '0 auto', marginTop : 10, position : 'relative', top : 40, width : '90%'}}>
+					<input 
+						style={{width : '100%'}}
+						ref='locInput' 
+						class="controls" 
+						type="text" 
+						placeholder="Enter Location"
+					/>
 				</div>
 
 				{/*
