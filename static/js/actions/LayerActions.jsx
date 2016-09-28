@@ -5,3 +5,10 @@ export function toggleLayer(term){
         type: 'TOGGLE_LAYER'
     })
 }
+
+export function changeLayer(layer){
+	dispatcher.dispatch({
+		type : 'CHANGE_LAYER',
+		layer : layer
+	})
+}

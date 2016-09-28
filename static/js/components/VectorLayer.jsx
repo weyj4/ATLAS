@@ -86,19 +86,7 @@ export default class VectorLayer extends MapComponent{
 		                        .style("stroke-width", "1.5px")
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
-		                        	if(d.properties.zika_risk){
-		                        		if(!d.properties.care_delivery){
-			                        		if(d.properties.pop_per_sq_km >= POP_CUTOFF){
-			                        			return 'red'; //level 1
-			                        		}else{
-			                        			return 'orange'; // level 2
-			                        		}
-		                        		}
-		                        	}
-		                        	if(!d.properties.care_delivery && !d.properties.zika_risk && d.properties.pop_per_sq_km >= POP_CUTOFF){
-		                        		return 'yellow'; // level 3
-		                        	}
-		                        	return 'lightgray';
+		                        	return component.props.layer.fill(d);
 		                        }).on('mousemove', (d, i, children) => {
 				                    var mouse = d3.mouse(document.body);
 				                    var point = new L.Point(mouse[1], mouse[0]);
@@ -118,10 +106,10 @@ export default class VectorLayer extends MapComponent{
 		            });
 		        }
 		    }
-		});
+		});''
 	}
 
-	componentDidMount(){
+	addLayer = () => {
 		var map = this.context.map;
 		map._initPathRoot();
 
@@ -135,17 +123,35 @@ export default class VectorLayer extends MapComponent{
             	.attr('id', 'tooltip');
 	}
 
+	componentDidMount(){
+		this.addLayer()
+	}
+
 	clear = () => {
 		const svg = d3.select(this.context.map._container).select('svg');
 		svg.selectAll('*').remove();
-		//container.select('svg').remove()
-		//container.select('#tooltip').remove()
 		this.context.map.removeLayer(this.polyLayer);
 	}
 
-	componentWillUnmount(){
+	componentWillUnmount(nextProps){
 		this.unmounted = true;
 		this.clear()
+	}
+
+	componentWillReceiveProps(nextProps){
+		if(nextProps.layer !== this.props.layer){
+			this.props = nextProps;
+			var selection = d3.select(this.context.map._container)
+				.select('svg')
+				.selectAll('g')
+				.selectAll('path')
+				.style('fill', (d) => {
+					if(d){
+						return this.props.layer.fill(d);
+					}
+				})
+		}
+		
 	}
 
 	render(){

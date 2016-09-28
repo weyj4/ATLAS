@@ -26,20 +26,26 @@ export default class Map extends React.Component{
 	}
 
 	updateLocation = () => {
-		
+		// Easier to just pan rather than have React re-render the scene
+		// Otherwise we need to keep track of the current zoom level etc...
+		this.refs.map.leafletElement.panTo(LocationStore.getLocation())
+	}
+
+	updateLayer = () => {
 		this.setState(_.extend({}, this.state, {
-			loc : LocationStore.getLocation()
+			layer : LayerStore.getLayer()
 		}))
-		//this.refs.map.leafletElement.panTo(LocationStore.getLocation())
 	}
 
 	componentWillMount() {
         LayerStore.on('change', this.updateLayerState);
+        LayerStore.on('change-layer', this.updateLayer);
         LocationStore.on('change-location', this.updateLocation)
 	}
 
     componentWillUnmount () {
     	LayerStore.removeListenter('change', this.updateLayerState)
+    	LayerStore.removeListenter('change-layer', this.updateLayer)
     	LocationStore.removeListenter('change-location', this.updateLocation)
     }
 
@@ -48,6 +54,7 @@ export default class Map extends React.Component{
 		this.state = {
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
+			layer : LayerStore.getLayer(),
 		}
 	}
 
@@ -59,6 +66,11 @@ export default class Map extends React.Component{
 			res[0] = temp;
 			this.refs.map.leafletElement.panTo(res)
 		})
+	}
+
+	moveEnd = (loc) => {
+		var coords = loc.target.getCenter();
+		LocationActions.pannedTo(coords);
 	}
 
 	render(){
@@ -78,9 +90,10 @@ export default class Map extends React.Component{
 					zoom={15}
 					style={{width : '100%', height : '100%'}}
 					scrollWheelZoom={false}
+					onDragEnd={this.moveEnd}
 				>
 				{
-					this.state.showLayer ? <VectorLayer/> : null
+					this.state.showLayer ? <VectorLayer layer={this.state.layer}/> : null
 				}
 				<Leaflet.TileLayer
 					url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'

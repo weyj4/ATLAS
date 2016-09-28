@@ -18,10 +18,18 @@ class LocationStore extends EventEmitter{
         this.emit('change-location');
     }
 
+    pannedTo(loc){
+        this.location = loc;
+        this.emit('pan-change');
+    }
+
     handleActions = (action) => {
         switch(action.type){
             case 'CHANGE_LOCATION':
                 this.updateLocation(action.location);
+                break;
+            case 'PANNED_TO':
+                this.pannedTo(action.location);
                 break;
         }
     }

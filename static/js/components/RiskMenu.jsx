@@ -1,20 +1,27 @@
 import React from 'react';
 import {Row, Col, Button, FormControl} from 'react-bootstrap'
-var _ = require('underscore');
 import Select from 'react-select';
-var d3 = require('d3');
+import d3 from 'd3';
 import Measure from 'react-measure';
 import * as LayerActions from 'atlas/actions/LayerActions';
 import LayerStore from 'atlas/stores/LayerStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
 import LocationStore from 'atlas/stores/LocationStore';
+import {Treebeard} from 'react-treebeard';
 
-const GOOGLE_API_KEY='AIzaSyC1sZH5IVnoDD3GbbfbPt2cWHjFDcDITug';
+var _ = require('underscore');
 
-
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initAutocomplete"
-         async defer></script>
-
+const data = {
+    name: 'Dengue Index',
+    value : 'dengue',
+    toggled: false,
+    active : true,
+    children: [
+        {name : 'Population Density', value : 'population'},
+        {name : 'Mosquito Presence', value : 'mosquito'},
+        {name : 'Care Delivery', value : 'care_delivery'}
+    ]
+};
 
 export default class RiskMenu extends React.Component{
 
@@ -24,20 +31,41 @@ export default class RiskMenu extends React.Component{
 		}))
 	}
 
+	updateLayer = () => {
+		this.setState(_.extend({}, this.state, {
+			layer : LayerStore.getLayer()
+		}))
+	}
+
+	updateLocation = () => {
+		var latLng = LocationStore.getLocation();
+		var radius = 2000; // meters
+		var bounds = new google.maps.Circle({center: latLng, radius: radius}).getBounds();
+		this.searchBox.setBounds(bounds);
+	}
+
 	componentWillMount() {
         LayerStore.on('change', this.updateLayerState);
+        LayerStore.on('change-layer', this.updateLayer);
+        LocationStore.on('pan-change', this.updateLocation);
+        LocationStore.on('change-location', this.updateLocation);
 	}
 
     componentWillUnmount () {
     	LayerStore.removeListenter('change', this.updateLayerState);
+    	LayerStore.removeListenter('change-layer', this.updateLayer);
+    	LocationStore.removeListenter('pan-change', this.updateLocation);
+    	LocationStore.removeListenter('change-location', this.updateLocation)
     }
 
 	constructor(props){
 		super(props);
 		this.state = {
-			diseases : [/*{label : 'Dengue', value : 'dengue'}, */ {label : 'Zika', value : 'zika'}],
-			selectedDisease : {value : 'zika', label : 'Zika'},
+			diseases : [{label : 'Dengue', value : 'dengue'} /*, {label : 'Zika', value : 'zika'}*/],
+			selectedDisease : {value : 'dengue', label : 'Dengue'},
 			showLayer : LayerStore.getLayerStatus(),
+			cursor : data,
+			layer : LayerStore.getLayer()
 		}
 	}
 
@@ -47,49 +75,15 @@ export default class RiskMenu extends React.Component{
 		}))
 	}
 
-
-	drawColorBar = () => {
-		if(this.state.width){
-			var width = this.state.width;
-			var height = 30;
-			var svg = d3.select(this.refs.colorBar).append("svg")
-			    .attr("width", width)
-			    .attr("height", height);
-
-			var defs = svg.append('defs')
-			var linearGradient = defs.append("linearGradient")
-	    		.attr("id", "linear-gradient");
-
-	    	linearGradient
-			    .attr("x1", "0%")
-			    .attr("y1", "0%")
-			    .attr("x2", "100%")
-			    .attr("y2", "0%");
-
-			linearGradient.append('stop')//Start color
-				.attr('offset', '0%')
-				.attr('stop-color', 'blue')
-
-			linearGradient.append('stop')//End color
-				.attr('offset', '100%')
-				.attr('stop-color', 'red')
-
-			svg.append("rect")
-				.attr("width", width)
-				.attr("height", height)
-				.style("fill", "url(#linear-gradient)");
-		}
-	}
-
 	componentDidMount(){
 		var latLng = LocationStore.getLocation();
 		var radius = 2000; // meters
 		var bounds = new google.maps.Circle({center: latLng, radius: radius}).getBounds();
-		var searchBox = new google.maps.places.SearchBox(this.refs.locInput);
-		searchBox.setBounds(bounds);
+		this.searchBox = new google.maps.places.SearchBox(this.refs.locInput);
+		this.searchBox.setBounds(bounds);
 
-		searchBox.addListener('places_changed', function(){
-			var places = searchBox.getPlaces();
+		this.searchBox.addListener('places_changed', () => {
+			var places = this.searchBox.getPlaces();
 			if(places.length === 0){
 				return;
 			}
@@ -101,19 +95,21 @@ export default class RiskMenu extends React.Component{
 		})
 	}
 
-	/*
-	componentDidMount(){
-		this.drawColorBar();
-	}
-
-	componentDidUpdate = () => {
-		this.clear()
-		this.drawColorBar()
-	}*/
-
 	toggleLayer = (event) => {
 		event.target.blur();
 		LayerActions.toggleLayer();
+	}
+
+	onToggle = (node, toggled) => {
+		if(this.state.cursor){
+			this.state.cursor.active = false;
+		}
+		node.active = true;
+		if(node.children){
+			node.toggled = toggled;
+		}
+		this.state.cursor = node;
+		LayerActions.changeLayer(node.value);
 	}
 	
 	render(){
@@ -127,43 +123,24 @@ export default class RiskMenu extends React.Component{
 					/>
 				</div>
 
-				<div style={{position : 'relative', paddingLeft : 30, 'top' : 30}}>
-					<p style={{fontSize : 25}}>{this.state.selectedDisease.label} Risk</p>
-					
-				</div>
-{/*	
-				<div style={{position : 'relative', top : 30, margin : '0 auto', width : '70%'}} ref="colorBar">
-					<Measure onMeasure={(dimensions) => this.setState(_.extend({}, this.state, dimensions))}>
-						<div></div>
-					</Measure>	
-				</div>
-			*/}
-				{/*
-				<div style={{display : 'table', position : 'relative', top : 30, margin : '0 auto', width : '100%', height : 20}}>
-						<div style={{display : 'table-row'}}>
-							<div style={{display : 'table-cell', textAlign : 'center'}}>Low</div>
-							<div style={{width : '70%', height : '100%', display : 'table-cell', textAlign : 'center'}} ref="colorBar">
-								<Measure onMeasure={(dimensions) => this.setState(_.extend({}, this.state, dimensions))}>
-									<div></div>
-								</Measure>	
-							</div>
-							<div style={{display : 'table-cell', textAlign : 'center'}}>High</div>
-						</div>
-				</div>
+				<div style={{width : '100%', position : 'relative', top : 40}}>
+					<Treebeard
+		                data={data}
+		                style={styles.tree}
+		                onToggle={this.onToggle}
+		            />
+	            </div>
 
-				<div style={{height : 30}}/>*/}
-
-				<table style={{position : 'relative', 'margin' : '0 auto', top : 30, width : '90%'}}>
+				<table style={{position : 'relative', 'margin' : '0 auto', top : 50, width : '90%'}}>
 					<tbody>
 						{
-							[{color : 'red', msg : 'Level 1 Cold Spot'}, {color : 'orange', msg : 'Level 2 Cold Spot'},
-							 {color : 'yellow', msg : 'Level 3 Cold Spot'}, {color : 'lightgray', msg : 'Stable'}].map((elem) => 
+							this.state.layer.options.map((elem) => 
 							 	<tr key={elem.color}>
 							 		<td style={{paddingBottom : '1em'}}>
 										<div style={_.extend({}, styles.cell, {color : elem.color, backgroundColor : elem.color})}></div>
 									</td>
 									<td style={{align : 'left', paddingBottom : '1em'}}>
-										{elem.msg}
+										{elem.label}
 									</td>
 							 	</tr>
 							 )
@@ -172,7 +149,7 @@ export default class RiskMenu extends React.Component{
 					</tbody>
 				</table>
 
-				<div style={{margin : '0 auto', position : 'relative', top : 40, width : '50%'}}>
+				<div style={{margin : '0 auto', position : 'relative', top : 50, width : '50%'}}>
 					<Button onClick={this.toggleLayer} bsStyle="primary" style={{width : '100%'}}>
 					{	
 						this.state.showLayer ? "Hide Layer" : "Show Layer"
@@ -180,7 +157,7 @@ export default class RiskMenu extends React.Component{
 					</Button>
 				</div>
 
-				<div style={{margin : '0 auto', marginTop : 10, position : 'relative', top : 40, width : '90%'}}>
+				<div style={{margin : '0 auto', marginTop : 10, position : 'relative', top : 50, width : '90%'}}>
 					<input 
 						style={{width : '100%'}}
 						ref='locInput' 
@@ -189,50 +166,6 @@ export default class RiskMenu extends React.Component{
 						placeholder="Enter Location"
 					/>
 				</div>
-
-				{/*
-				<div style={{position : 'relative', margin : '0 auto', top : 30, width : '100%', height : 20}}>
-					<div style={{width : '100%', display : 'table'}}>
-						<div style={{display : 'table-row'}}>
-							<div style={{display : 'table-cell', textAlign : 'center'}}>Low</div>
-							{
-								['blue', 'orange', 'red'].map((c) => 
-									<div key={c} style={_.extend({}, styles.cell, {color : c, backgroundColor : c})}>
-									</div>
-								)
-							}
-							<div style={{display : 'table-cell', textAlign : 'center'}}>High</div>
-						</div>
-					</div>
-				</div>*/}
-
-				{
-				/*
-				<div style={{position : 'relative', paddingLeft : 30, 'top' : 30}}>
-					<p style={{fontSize : 25}}>Data Need</p>
-				</div>
-
-				<div style={{position : 'relative', margin : '0 auto', top : 30, width : '100%', height : 20}}>
-					<div style={{width : '100%', display : 'table'}}>
-						<div style={{display : 'table-row'}}>
-							<div style={{display : 'table-cell', textAlign : 'center'}}>Low</div>
-							{
-								['red', 'blue', 'green'].map((c) => 
-									<div key={c} style={_.extend({}, styles.cell, {color : c, backgroundColor : c})}>
-									</div>
-								)
-							}
-							<div style={{display : 'table-cell', textAlign : 'center'}}>High</div>
-						</div>
-					</div>
-				</div>
-
-				<div style={{position : 'absolute', paddingLeft : 30, bottom : 20}}>
-					<p style={styles.label}>ATLAS</p>
-				</div>
-				*/
-				}
-
 			</div>
 		)
 	}
@@ -242,7 +175,82 @@ const styles = {
 	cell : {
 			height : 40,
 			width : 40,
-//			display : 'table-cell',
 			opacity : 0.5,
-		}
+		},
+	tree : {tree: {
+        base: {
+            listStyle: 'none',
+            backgroundColor: '#FFFFFF',
+            margin: 0,
+            padding: 0,
+            color: '#000000',
+            fontFamily: 'lucida grande ,tahoma,verdana,arial,sans-serif',
+            fontSize: '14px'
+        },
+        node: {
+            base: {
+                position: 'relative'
+            },
+            link: {
+                cursor: 'pointer',
+                position: 'relative',
+                padding: '0px 5px',
+                display: 'block'
+            },
+            activeLink: {
+                background: '#DCDFE0'
+            },
+            toggle: {
+                base: {
+                    position: 'relative',
+                    display: 'inline-block',
+                    verticalAlign: 'top',
+                    marginLeft: '-5px',
+                    height: '24px',
+                    width: '24px'
+                },
+                wrapper: {
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    margin: '-7px 0 0 -7px',
+                    height: '14px'
+                },
+                height: 14,
+                width: 14,
+                arrow: {
+                    fill: '#000000',
+                    strokeWidth: 0
+                }
+            },
+            header: {
+                base: {
+                    display: 'inline-block',
+                    verticalAlign: 'top',
+                    color: '#000000'
+                },
+                connector: {
+                    width: '2px',
+                    height: '12px',
+                    borderLeft: 'solid 2px black',
+                    borderBottom: 'solid 2px black',
+                    position: 'absolute',
+                    top: '0px',
+                    left: '-21px'
+                },
+                title: {
+                    lineHeight: '24px',
+                    verticalAlign: 'middle'
+                }
+            },
+            subtree: {
+                listStyle: 'none',
+                paddingLeft: '19px'
+            },
+            loading: {
+                color: '#E2C089'
+            }
+        }
+    }
+    }
 }
