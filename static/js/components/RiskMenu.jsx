@@ -7,21 +7,8 @@ import * as LayerActions from 'atlas/actions/LayerActions';
 import LayerStore from 'atlas/stores/LayerStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
 import LocationStore from 'atlas/stores/LocationStore';
-import {Treebeard} from 'react-treebeard';
 
 var _ = require('underscore');
-
-const data = {
-    name: 'Dengue Index',
-    value : 'dengue',
-    toggled: false,
-    active : true,
-    children: [
-        {name : 'Population Density', value : 'population'},
-        {name : 'Mosquito Presence', value : 'mosquito'},
-        {name : 'Care Delivery', value : 'care_delivery'}
-    ]
-};
 
 export default class RiskMenu extends React.Component{
 
@@ -64,8 +51,8 @@ export default class RiskMenu extends React.Component{
 			diseases : [{label : 'Dengue', value : 'dengue'} /*, {label : 'Zika', value : 'zika'}*/],
 			selectedDisease : {value : 'dengue', label : 'Dengue'},
 			showLayer : LayerStore.getLayerStatus(),
-			cursor : data,
-			layer : LayerStore.getLayer()
+			layer : LayerStore.getLayer(),
+			layers : LayerStore.getLayerOptions()
 		}
 	}
 
@@ -99,37 +86,27 @@ export default class RiskMenu extends React.Component{
 		event.target.blur();
 		LayerActions.toggleLayer();
 	}
-
-	onToggle = (node, toggled) => {
-		if(this.state.cursor){
-			this.state.cursor.active = false;
-		}
-		node.active = true;
-		if(node.children){
-			node.toggled = toggled;
-		}
-		this.state.cursor = node;
-		LayerActions.changeLayer(node.value);
-	}
 	
+	changeLayer = (layer) => {
+		LayerActions.changeLayer(layer.value);
+	}
+
 	render(){
 		return(
 			<div style={_.extend({}, this.props.style, {backgroundColor : 'white', zIndex : 1})}>
-				<div style={{width : '80%', margin : '0 auto', position : 'relative', top : 30}}>
-					<Select
-						value={this.state.selectedDisease ? this.state.selectedDisease.value : undefined}
-						options={this.state.diseases}
-						onChange={this.changeDisease}
-					/>
+
+				<div style={{position : 'relative', 'top' : 30}}>
+					<p class="text-center" style={{fontSize : 25}}>{this.state.selectedDisease.label}</p>
 				</div>
 
-				<div style={{width : '100%', position : 'relative', top : 40}}>
-					<Treebeard
-		                data={data}
-		                style={styles.tree}
-		                onToggle={this.onToggle}
-		            />
-	            </div>
+				<div style={{width : '80%', margin : '0 auto', position : 'relative', top : 30}}>
+					<Select
+						value={this.state.layer.value}
+						options={this.state.layers}
+						onChange={this.changeLayer}
+						clearable={false}
+					/>
+				</div>
 
 				<table style={{position : 'relative', 'margin' : '0 auto', top : 50, width : '90%'}}>
 					<tbody>
@@ -177,80 +154,4 @@ const styles = {
 			width : 40,
 			opacity : 0.5,
 		},
-	tree : {tree: {
-        base: {
-            listStyle: 'none',
-            backgroundColor: '#FFFFFF',
-            margin: 0,
-            padding: 0,
-            color: '#000000',
-            fontFamily: 'lucida grande ,tahoma,verdana,arial,sans-serif',
-            fontSize: '14px'
-        },
-        node: {
-            base: {
-                position: 'relative'
-            },
-            link: {
-                cursor: 'pointer',
-                position: 'relative',
-                padding: '0px 5px',
-                display: 'block'
-            },
-            activeLink: {
-                background: '#DCDFE0'
-            },
-            toggle: {
-                base: {
-                    position: 'relative',
-                    display: 'inline-block',
-                    verticalAlign: 'top',
-                    marginLeft: '-5px',
-                    height: '24px',
-                    width: '24px'
-                },
-                wrapper: {
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    margin: '-7px 0 0 -7px',
-                    height: '14px'
-                },
-                height: 14,
-                width: 14,
-                arrow: {
-                    fill: '#000000',
-                    strokeWidth: 0
-                }
-            },
-            header: {
-                base: {
-                    display: 'inline-block',
-                    verticalAlign: 'top',
-                    color: '#000000'
-                },
-                connector: {
-                    width: '2px',
-                    height: '12px',
-                    borderLeft: 'solid 2px black',
-                    borderBottom: 'solid 2px black',
-                    position: 'absolute',
-                    top: '0px',
-                    left: '-21px'
-                },
-                title: {
-                    lineHeight: '24px',
-                    verticalAlign: 'middle'
-                }
-            },
-            subtree: {
-                listStyle: 'none',
-                paddingLeft: '19px'
-            },
-            loading: {
-                color: '#E2C089'
-            }
-        }
-    }
-    }
 }

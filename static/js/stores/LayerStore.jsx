@@ -12,6 +12,8 @@ class LayerStore extends EventEmitter{
         this.currentLayer = 'dengue'
         this.layers = {
             dengue : {
+                label : 'Dengue Risk Index',
+                value : 'dengue',
                 fill : function(d){
                     if(d.properties.zika_risk){
                         if(!d.properties.care_delivery){
@@ -35,6 +37,8 @@ class LayerStore extends EventEmitter{
                 ]
             }, 
             population : {
+                value : 'population',
+                label : 'Population Density',
                 fill : function(d){
                     if(d.properties.pop_per_sq_km >= POP_CUTOFF){
                         return 'red';
@@ -48,6 +52,8 @@ class LayerStore extends EventEmitter{
                 ]
             },
             mosquito : {
+                value : 'mosquito',
+                label : 'Mosquito Presence',
                 fill : function(d){
                     if(d.properties.zika_risk){
                         return 'red';
@@ -61,6 +67,8 @@ class LayerStore extends EventEmitter{
                 ]
             },
             care_delivery : {
+                value : 'care_delivery',
+                label : 'Care Delivery',
                 fill : function(d){
                     if(d.properties.care_delivery){
                         return 'lightgray';
@@ -74,6 +82,14 @@ class LayerStore extends EventEmitter{
                 ]
             }
         }
+    }
+
+    getLayerOptions(){
+        var options = []
+        for(var field in this.layers){
+            options.push({value : field, label : this.layers[field].label});
+        }
+        return options;
     }
 
     getLayer(){
