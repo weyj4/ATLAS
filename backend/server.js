@@ -46,6 +46,13 @@ app.get('/HighestRisk', function(req, res){
 
 app.get('/test_layer/:z/:x/:y.geojson', function(req, res){
 
+    if(req.params.z <= 13){//too far away
+        res.json({
+            type : 'FeatureCollection', features : []
+        })
+        return
+    }
+
     console.log(`http://${ip}:${port}/test_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
 
     // Compute the bounding box of the supplied coordinates
