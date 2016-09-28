@@ -28,7 +28,11 @@ export default class Map extends React.Component{
 	updateLocation = () => {
 		// Easier to just pan rather than have React re-render the scene
 		// Otherwise we need to keep track of the current zoom level etc...
-		this.refs.map.leafletElement.panTo(LocationStore.getLocation())
+		//this.refs.map.leafletElement.panTo(LocationStore.getLocation())
+		this.setState(_.extend({}, this.state, {
+			loc : LocationStore.getLocation(),
+			loi : LocationStore.getLOI(),
+		}))
 	}
 
 	updateLayer = () => {
@@ -37,10 +41,16 @@ export default class Map extends React.Component{
 		}))
 	}
 
+	updateLocationsOfInterest = () => {
+		var loi = LocationStore.getLOI();
+		this.setState(_.extend({}, this.state, {loi : loi}))
+	}
+
 	componentWillMount() {
         LayerStore.on('change', this.updateLayerState);
         LayerStore.on('change-layer', this.updateLayer);
-        LocationStore.on('change-location', this.updateLocation)
+        LocationStore.on('change-location', this.updateLocation);
+        LocationStore.on('new-loi', this.updateLocationsOfInterest);
 	}
 
     componentWillUnmount () {
@@ -55,6 +65,7 @@ export default class Map extends React.Component{
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
+			zoom : 15
 		}
 	}
 
@@ -73,6 +84,22 @@ export default class Map extends React.Component{
 		LocationActions.pannedTo(coords);
 	}
 
+	componentDidMount(){
+		var map = this.refs.map.leafletElement;
+		// Keep track of the zoom level.  Don't actually set the state
+		// though, this is only necessary when a different state change
+		// occurs and we want to remember what the zoom level is.
+		map.on('zoomend', (z) => {
+			this.state.zoom = map.getZoom();
+		})
+	}
+
+	clickMarker = (location) => (marker) => {
+		if(!marker.target.getPopup()){
+			marker.target.bindPopup(location.name).openPopup()
+		}
+	}
+
 	render(){
 		return(
 			<div {...this.props}>
@@ -86,12 +113,27 @@ export default class Map extends React.Component{
 				<Leaflet.Map 
 					ref='map'
 					id='map'
+					bounds={this.state.loi ? this.state.loi.bounds : undefined}
 					center={[this.state.loc.lat, this.state.loc.lng]} 
-					zoom={15}
+					zoom={this.state.zoom}
 					style={{width : '100%', height : '100%'}}
 					scrollWheelZoom={false}
 					onDragEnd={this.moveEnd}
 				>
+				{
+					this.state.loi ? 
+						this.state.loi.locations.map((loc, i) => 
+							<Leaflet.Marker
+								key={i} 
+								onClick={this.clickMarker(loc)}
+								position={{
+									lat : loc.geometry.location.lat(),
+									lng : loc.geometry.location.lng()
+								}}
+							/>
+						) : 
+						null
+				}
 				{
 					this.state.showLayer ? <VectorLayer layer={this.state.layer}/> : null
 				}

@@ -18,3 +18,11 @@ export function pannedTo(loc){
 		location : loc
 	})
 }
+
+// Plot locations of interest
+export function addLOI(locations){
+	dispatcher.dispatch({
+		type : 'ADD_LOI',
+		locations : locations
+	})
+}

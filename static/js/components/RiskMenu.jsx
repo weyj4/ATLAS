@@ -73,12 +73,15 @@ export default class RiskMenu extends React.Component{
 			var places = this.searchBox.getPlaces();
 			if(places.length === 0){
 				return;
+			}else if(places.length === 1){
+				var loc = places[0].geometry.location;
+				LocationActions.updateLocation({
+					lat : loc.lat(),
+					lng : loc.lng()
+				});
+			}else{
+				LocationActions.addLOI(places);
 			}
-			var loc = places[0].geometry.location;
-			LocationActions.updateLocation({
-				lat : loc.lat(),
-				lng : loc.lng()
-			});
 		})
 	}
 
@@ -143,6 +146,17 @@ export default class RiskMenu extends React.Component{
 						placeholder="Enter Location"
 					/>
 				</div>
+
+				<div style={{width : '100%', margin : '0 auto', position : 'relative', top : 60}}>
+					<ul>
+					{
+						this.state.layer.notes.map((note, i) => 
+							<li key={i}>{note}</li>
+						)
+					}
+					</ul>
+				</div>
+
 			</div>
 		)
 	}

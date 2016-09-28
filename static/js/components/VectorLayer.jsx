@@ -81,9 +81,8 @@ export default class VectorLayer extends MapComponent{
 		                        .data(geoJson.features).enter()
 		                      .append("path")
 		                        .attr("d", self._path)
-		                        .style('stroke', '#000000')
 		                        .style('fill-opacity', 0.2)
-		                        .style("stroke-width", "1.5px")
+		                        .style("stroke-width", "0px")
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
 		                        	return component.props.layer.fill(d);

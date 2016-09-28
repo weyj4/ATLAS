@@ -34,6 +34,11 @@ class LayerStore extends EventEmitter{
                     {label  :'Level 2 Cold Spot', color : 'orange'},
                     {label : 'Level 3 Cold Spot', color : 'yellow'},
                     {label : 'Stable', color : 'lightgray'}
+                ],
+                notes : [
+                    'Level 1: A. Aegypti mosquito present, no care delivery, high population density',
+                    'Level 2: A. Aegypti mosquito present, no care delivery, low population density',
+                    'Level 3: A. Aegypti mosquito not present, no care delivery, high population density',
                 ]
             }, 
             population : {
@@ -49,7 +54,8 @@ class LayerStore extends EventEmitter{
                 options : [
                     {label : 'High Population Density', color : 'red'},
                     {label : 'Low Population Density', color : 'lightgray'}
-                ]
+                ],
+                notes : []
             },
             mosquito : {
                 value : 'mosquito',
@@ -64,7 +70,8 @@ class LayerStore extends EventEmitter{
                 options : [
                     {label : 'A. Aegypti Mosquito Present', color : 'red'},
                     {label : 'A. Aegypti Mosquito Not Present', color : 'lightgray'}
-                ]
+                ],
+                notes : []
             },
             care_delivery : {
                 value : 'care_delivery',
@@ -79,7 +86,8 @@ class LayerStore extends EventEmitter{
                 options : [
                     {label : 'Minimal/No Care Delivery', color : 'red'},
                     {label : 'Care Delivery', color : 'lightgray'}
-                ]
+                ],
+                notes : []
             }
         }
     }
