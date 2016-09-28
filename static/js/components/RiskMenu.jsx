@@ -39,10 +39,10 @@ export default class RiskMenu extends React.Component{
 	}
 
     componentWillUnmount () {
-    	LayerStore.removeListenter('change', this.updateLayerState);
-    	LayerStore.removeListenter('change-layer', this.updateLayer);
-    	LocationStore.removeListenter('pan-change', this.updateLocation);
-    	LocationStore.removeListenter('change-location', this.updateLocation)
+    	LayerStore.removeListener('change', this.updateLayerState);
+    	LayerStore.removeListener('change-layer', this.updateLayer);
+    	LocationStore.removeListener('pan-change', this.updateLocation);
+    	LocationStore.removeListener('change-location', this.updateLocation)
     }
 
 	constructor(props){

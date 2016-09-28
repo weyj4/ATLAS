@@ -44,9 +44,9 @@ export default class Map extends React.Component{
 	}
 
     componentWillUnmount () {
-    	LayerStore.removeListenter('change', this.updateLayerState)
-    	LayerStore.removeListenter('change-layer', this.updateLayer)
-    	LocationStore.removeListenter('change-location', this.updateLocation)
+    	LayerStore.removeListener('change', this.updateLayerState)
+    	LayerStore.removeListener('change-layer', this.updateLayer)
+    	LocationStore.removeListener('change-location', this.updateLocation)
     }
 
 	constructor(){
