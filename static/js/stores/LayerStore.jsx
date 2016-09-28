@@ -63,9 +63,9 @@ class LayerStore extends EventEmitter{
             care_delivery : {
                 fill : function(d){
                     if(d.properties.care_delivery){
-                        return 'red';
+                        return 'lightgray';
                     }else{
-                        return 'lightgray'
+                        return 'red'
                     }
                 },
                 options : [
