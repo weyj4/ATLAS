@@ -94,9 +94,20 @@ export default class Map extends React.Component{
 		})
 	}
 
-	clickMarker = (location) => (marker) => {
-		if(!marker.target.getPopup()){
-			marker.target.bindPopup(location.name).openPopup()
+	clickMarker = (location) => (event) => {
+		var marker = event.target;
+		if(!marker.getPopup()){
+
+			var circle = new L.circle(marker.getLatLng(), 5000);
+			marker.on('popupopen', () => {
+				// 5 km circle
+				circle.addTo(this.refs.map.leafletElement);
+			})
+			marker.on('popupclose', () => {
+				this.refs.map.leafletElement.removeLayer(circle);
+			})
+
+			marker.bindPopup(location.name).openPopup()		
 		}
 	}
 
@@ -135,7 +146,11 @@ export default class Map extends React.Component{
 						null
 				}
 				{
-					this.state.showLayer ? <VectorLayer layer={this.state.layer}/> : null
+					this.state.showLayer ? 
+						<VectorLayer 
+							layer={this.state.layer}
+							endpoint='test_layer/{z}/{x}/{y}.geojson'
+						/> : null
 				}
 				<Leaflet.TileLayer
 					url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
