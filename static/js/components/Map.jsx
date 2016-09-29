@@ -43,7 +43,9 @@ export default class Map extends React.Component{
 
 	updateLocationsOfInterest = () => {
 		var loi = LocationStore.getLOI();
-		this.setState(_.extend({}, this.state, {loi : loi}))
+		this.state.loi = loi;
+		this.addMarkers();
+		//this.setState(_.extend({}, this.state, {loi : loi}))
 	}
 
 	componentWillMount() {
@@ -61,6 +63,7 @@ export default class Map extends React.Component{
 
 	constructor(){
 		super()
+		this.markers = [];
 		this.state = {
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
@@ -92,22 +95,36 @@ export default class Map extends React.Component{
 		map.on('zoomend', (z) => {
 			this.state.zoom = map.getZoom();
 		})
+		this.addMarkers();
 	}
 
-	clickMarker = (location) => (event) => {
-		var marker = event.target;
-		if(!marker.getPopup()){
+	addMarkers = () => {
+		var map = this.refs.map.leafletElement;
+		for(var i = 0; i < this.markers.length; i++){
+			map.removeLayer(this.markers[i]);
+		}
+		this.markers = [];
+		if(this.state.loi){
+			for(var i = 0; i < this.state.loi.locations.length; i++){
+				var loc = this.state.loi.locations[i];
+				var marker = new L.marker({
+					lat : loc.geometry.location.lat(),
+					lng : loc.geometry.location.lng()
+				});
+				marker.bindPopup(loc.name);
 
-			var circle = new L.circle(marker.getLatLng(), 5000);
-			marker.on('popupopen', () => {
-				// 5 km circle
-				circle.addTo(this.refs.map.leafletElement);
-			})
-			marker.on('popupclose', () => {
-				this.refs.map.leafletElement.removeLayer(circle);
-			})
-
-			marker.bindPopup(location.name).openPopup()		
+				let circle = new L.circle(marker.getLatLng(), 5000);
+				marker.on('popupopen', () => {
+					// 5 km circle
+					circle.addTo(this.refs.map.leafletElement);
+				})
+				marker.on('popupclose', () => {
+					this.refs.map.leafletElement.removeLayer(circle);
+				})
+				marker.addTo(map);
+				this.markers.push(marker);
+			}
+			map.fitBounds(this.state.loi.bounds);
 		}
 	}
 
@@ -131,20 +148,6 @@ export default class Map extends React.Component{
 					scrollWheelZoom={false}
 					onDragEnd={this.moveEnd}
 				>
-				{
-					this.state.loi ? 
-						this.state.loi.locations.map((loc, i) => 
-							<Leaflet.Marker
-								key={i} 
-								onClick={this.clickMarker(loc)}
-								position={{
-									lat : loc.geometry.location.lat(),
-									lng : loc.geometry.location.lng()
-								}}
-							/>
-						) : 
-						null
-				}
 				{
 					this.state.showLayer ? 
 						<VectorLayer 
