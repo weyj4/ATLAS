@@ -10,6 +10,7 @@ import d3 from 'd3';
 import _ from 'underscore';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
+import uniqueID from 'atlas/UniqueID';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -45,7 +46,6 @@ export default class Map extends React.Component{
 		var loi = LocationStore.getLOI();
 		this.state.loi = loi;
 		this.addMarkers();
-		//this.setState(_.extend({}, this.state, {loi : loi}))
 	}
 
 	componentWillMount() {
@@ -68,7 +68,7 @@ export default class Map extends React.Component{
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
-			zoom : 15
+			zoom : 15,
 		}
 	}
 
@@ -94,6 +94,7 @@ export default class Map extends React.Component{
 		// occurs and we want to remember what the zoom level is.
 		map.on('zoomend', (z) => {
 			this.state.zoom = map.getZoom();
+			console.log('zoom = ' + this.state.zoom)
 		})
 		this.addMarkers();
 	}
@@ -107,10 +108,17 @@ export default class Map extends React.Component{
 		if(this.state.loi){
 			for(var i = 0; i < this.state.loi.locations.length; i++){
 				var loc = this.state.loi.locations[i];
+
+				/*
+				var icon = L.icon({
+					iconUrl : loc.icon,
+					iconSize : [25, 25]
+				})*/
+
 				var marker = new L.marker({
 					lat : loc.geometry.location.lat(),
 					lng : loc.geometry.location.lng()
-				});
+				}/* {icon : icon}*/);
 				marker.bindPopup(loc.name);
 
 				let circle = new L.circle(marker.getLatLng(), 5000);
@@ -129,6 +137,7 @@ export default class Map extends React.Component{
 	}
 
 	render(){
+		console.log('zoom = ' + this.state.zoom)
 		return(
 			<div {...this.props}>
 				<Button 
@@ -148,12 +157,30 @@ export default class Map extends React.Component{
 					scrollWheelZoom={false}
 					onDragEnd={this.moveEnd}
 				>
+				{/*
+				<VectorLayer
+					id={'__id__1'}
+					layer={{
+						value : 'water',
+						label : 'Water',
+						fill : (d) => 'pink'
+					}}
+					endpoint='water_layer/{z}/{x}/{y}.geojson'
+					tooltip={(d, coords) => `Name: ${d.properties.name}`}
+				/>*/}
 				{
 					this.state.showLayer ? 
 						<VectorLayer 
+							id={'__id__2'}
 							layer={this.state.layer}
 							endpoint='test_layer/{z}/{x}/{y}.geojson'
+							tooltip={(d, coords) => {
+								return `ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
+		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
+		                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
+							}}
 						/> : null
+						
 				}
 				<Leaflet.TileLayer
 					url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'

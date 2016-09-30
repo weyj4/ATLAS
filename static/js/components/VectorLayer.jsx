@@ -26,6 +26,7 @@ export default class VectorLayer extends MapComponent{
 
 	constructor(props){
 		super(props);
+		console.log(`Vector Layer constructor, id = ${props.id}`)
 		var component = this;
 		var polygons = {};
 		L.TileLayer.d3_topoJSON =  L.TileLayer.extend({
@@ -62,17 +63,20 @@ export default class VectorLayer extends MapComponent{
 		                    				.append("g")
 
 		                    component.filterPolygons(polygons, geoJson)
-		                    
-		                    tile.nodes.selectAll("path")
+		                    console.log(`Adding path with class ${component.props.id}`)
+		                    var paths = tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
+		                      	.attr('class', component.props.id)
 		                        .attr("d", self._path)
 		                        .style('fill-opacity', 0.2)
 		                        .style("stroke-width", "0px")
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
 		                        	return component.props.layer.fill(d);
-		                        }).on('mousemove', (d, i, children) => {
+		                        })
+		                    if(component.props.tooltip){
+		                    	paths.on('mousemove', (d, i, children) => {
 				                    var mouse = d3.mouse(document.body);
 				                    var point = new L.Point(mouse[1], mouse[0]);
 				                    var coords = component.context.map.layerPointToLatLng(point)
@@ -80,13 +84,12 @@ export default class VectorLayer extends MapComponent{
 				                    component.tooltip.classed('hidden', false)
 				                        .attr('style', 'left:' + (mouse[0] + 15) +
 				                                'px; top:' + (mouse[1] - 35) + 'px')
-				                        .html(`ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
-				                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
-				                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`);
+				                        .html(component.props.tooltip(d, coords))
 
 				                }).on('mouseout', (d) => {
 				                	component.tooltip.classed('hidden', true)
 				                })
+		                    }
 		                }
 		            });
 		        }
@@ -114,12 +117,14 @@ export default class VectorLayer extends MapComponent{
 
 	clear = () => {
 		const svg = d3.select(this.context.map._container).select('svg');
-		svg.selectAll('*').remove();
+		svg.selectAll('.' + this.props.id).remove();
 		this.context.map.removeLayer(this.polyLayer);
 	}
 
 	componentWillUnmount(nextProps){
+		console.log(`Unmounting ${this.props.id}`)
 		this.unmounted = true;
+		this.tooltip.classed('hidden', true)
 		this.clear()
 	}
 
@@ -140,6 +145,7 @@ export default class VectorLayer extends MapComponent{
 	}
 
 	render(){
+		console.log(`Rendering ${this.props.id}`)
 		return(null)
 	}
 }
