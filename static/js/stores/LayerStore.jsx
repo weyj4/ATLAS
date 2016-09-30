@@ -88,6 +88,10 @@ class LayerStore extends EventEmitter{
                     {label : 'Care Delivery', color : 'lightgray'}
                 ],
                 notes : []
+            },
+            custom : {
+                value : 'custom',
+                label : 'Build Custom Index',
             }
         }
     }

@@ -8,6 +8,8 @@ import LayerStore from 'atlas/stores/LayerStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
 import LocationStore from 'atlas/stores/LocationStore';
 
+import * as IndexBuilderActions from 'atlas/actions/IndexBuilderActions';
+
 var _ = require('underscore');
 
 export default class RiskMenu extends React.Component{
@@ -91,7 +93,11 @@ export default class RiskMenu extends React.Component{
 	}
 	
 	changeLayer = (layer) => {
-		LayerActions.changeLayer(layer.value);
+		if(layer.value === 'custom'){
+			IndexBuilderActions.showBuilder();
+		}else{
+			LayerActions.changeLayer(layer.value);
+		}
 	}
 
 	render(){
