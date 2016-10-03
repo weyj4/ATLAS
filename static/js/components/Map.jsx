@@ -10,7 +10,6 @@ import d3 from 'd3';
 import _ from 'underscore';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
-import uniqueID from 'atlas/UniqueID';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -150,7 +149,6 @@ export default class Map extends React.Component{
 				<Leaflet.Map 
 					ref='map'
 					id='map'
-					bounds={this.state.loi ? this.state.loi.bounds : undefined}
 					center={[this.state.loc.lat, this.state.loc.lng]} 
 					zoom={this.state.zoom}
 					style={{width : '100%', height : '100%'}}
