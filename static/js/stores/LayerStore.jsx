@@ -122,6 +122,12 @@ class LayerStore extends EventEmitter{
         this.emit('change-layer')
     }
 
+    addLayer(layer){
+        this.layers[layer.value] = layer;
+        this.currentLayer = layer.value;
+        this.emit('change-layer');
+    }
+
     handleActions = (action) => {
         switch(action.type){
             case 'TOGGLE_LAYER':
@@ -129,6 +135,9 @@ class LayerStore extends EventEmitter{
                 break;
             case 'CHANGE_LAYER':
                 this.changeLayer(action.layer);
+                break;
+            case 'ADD_LAYER':
+                this.addLayer(action.layer);
                 break;
         }
     }

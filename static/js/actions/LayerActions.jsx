@@ -12,3 +12,10 @@ export function changeLayer(layer){
 		layer : layer
 	})
 }
+
+export function addLayer(layer){
+	dispatcher.dispatch({
+		type : 'ADD_LAYER',
+		layer : layer
+	})
+}
