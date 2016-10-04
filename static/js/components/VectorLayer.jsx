@@ -75,19 +75,7 @@ export default class VectorLayer extends MapComponent{
 		                        })
 		                    if(component.props.tooltip){
 		                    	paths.on('mousemove', (d, i, children) => {
-				                    var mouse = d3.mouse(document.body);
-				                    var point = new L.Point(mouse[1], mouse[0]);
-				                    var coords = component.context.map.layerPointToLatLng(point)
-
-				                    component.tooltipContainer.classed('hidden', false)
-				                        .attr('style', 'left:' + (mouse[0] + 15) +
-				                                'px; top:' + (mouse[1] - 35) + 'px')
-
-				                    component.tooltip
-				                        .html(component.props.tooltip(d, coords))
-
-				                }).on('mouseout', (d) => {
-				                	component.tooltipContainer.classed('hidden', true)
+				                    component.tooltipPolygonInfo.html(component.props.tooltip(d))
 				                })
 		                    }
 		                }
@@ -106,19 +94,20 @@ export default class VectorLayer extends MapComponent{
 
 		this.polyLayer = new L.TileLayer.d3_topoJSON(`${BACKEND_URL}/${this.props.endpoint}`, {layerName : 'blocks'}).addTo(map);
 
-		this.tooltipContainer = d3.select(this.context.map._container).append('div')
-			            	.attr('class', 'hidden tooltip')
+        this.tooltip = d3.select(this.context.map._container).append('div')
+        	.attr('class', 'hidden tooltip')
+        	.attr('id', 'tooltip')
 
-		this.tooltip = this.tooltipContainer
-				.append('span')
+        this.tooltipPolygonInfo = this.tooltip.append('span');
 
-		this.latLngSpan = this.tooltipContainer.append('span')
+        this.tooltipCoordinates = this.tooltip.append('span');
 
-		map.on('mousemove', (d) => {
-			this.latLngSpan.html(`<br/>Coordinates: (${d.latlng.lat.toFixed(4)}, ${d.latlng.lng.toFixed(4)})<br/>`)
-		})
-
-
+        map.on('mousemove', (d) => {
+        	this.tooltip.classed('hidden', false)
+        		.attr('style', `left: ${d.originalEvent.clientX}px; top: ${d.originalEvent.clientY}px`)
+        	this.tooltipCoordinates.html(`<br/>Coordinates: (${d.latlng.lat.toFixed(4)}, ${d.latlng.lng.toFixed(4)})`)
+        })
+        map.on('mouseout', (d) => this.tooltip.classed('hidden', true))
 	}
 
 	componentDidMount(){
