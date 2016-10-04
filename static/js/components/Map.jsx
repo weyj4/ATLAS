@@ -173,8 +173,7 @@ export default class Map extends React.Component{
 							tooltip={(d, coords) => {
 								var pop = d.properties.pop_per_sq_km * 1000
 								return `ID: ${d.gid}<br/>Population Density: ${pop.toFixed(1)} people/km<sup>2</sup><br/>
-		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
-		                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
+		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}`
 							}}
 						/> : null
 						
