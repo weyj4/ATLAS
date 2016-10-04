@@ -172,10 +172,9 @@ export default class Map extends React.Component{
 							id={'__id__2'}
 							layer={this.state.layer}
 							endpoint='test_layer/{z}/{x}/{y}.geojson'
-							tooltip={(d, coords) => {
+							tooltip={(d) => {
 								return `ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
-		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}
-		                        	   <br/>Coordinates: (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`
+		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}`
 							}}
 						/> : null
 						
