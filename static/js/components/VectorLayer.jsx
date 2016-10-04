@@ -26,7 +26,6 @@ export default class VectorLayer extends MapComponent{
 
 	constructor(props){
 		super(props);
-		console.log(`Vector Layer constructor, id = ${props.id}`)
 		var component = this;
 		var polygons = {};
 		L.TileLayer.d3_topoJSON =  L.TileLayer.extend({
@@ -63,7 +62,6 @@ export default class VectorLayer extends MapComponent{
 		                    				.append("g")
 
 		                    component.filterPolygons(polygons, geoJson)
-		                    console.log(`Adding path with class ${component.props.id}`)
 		                    var paths = tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
@@ -122,7 +120,6 @@ export default class VectorLayer extends MapComponent{
 	}
 
 	componentWillUnmount(nextProps){
-		console.log(`Unmounting ${this.props.id}`)
 		this.unmounted = true;
 		this.tooltip.classed('hidden', true)
 		this.clear()
@@ -145,7 +142,6 @@ export default class VectorLayer extends MapComponent{
 	}
 
 	render(){
-		console.log(`Rendering ${this.props.id}`)
 		return(null)
 	}
 }

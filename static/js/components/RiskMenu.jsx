@@ -22,7 +22,8 @@ export default class RiskMenu extends React.Component{
 
 	updateLayer = () => {
 		this.setState(_.extend({}, this.state, {
-			layer : LayerStore.getLayer()
+			layer : LayerStore.getLayer(),
+			layers : LayerStore.getLayerOptions()
 		}))
 	}
 
@@ -56,12 +57,6 @@ export default class RiskMenu extends React.Component{
 			layer : LayerStore.getLayer(),
 			layers : LayerStore.getLayerOptions()
 		}
-	}
-
-	changeDisease = (disease) => {
-		this.setState(_.extend({}, this.state, {
-			selectedDisease : disease
-		}))
 	}
 
 	componentDidMount(){
@@ -100,6 +95,37 @@ export default class RiskMenu extends React.Component{
 		}
 	}
 
+	editLayer = (event) => {
+		if(event.target.className === 'layer-edit-button'){
+			event.stopPropagation();
+			LayerActions.editLayer(event.target.id);
+		}
+	}
+
+	renderOption = (option, i) => {
+		return (
+			<div onClick={this.editLayer}>
+				<span>
+					{option.label}
+				</span>
+				{
+					LayerStore.isEditable(option.value) ? 
+					<span class='pull-right' onClick={this.editLayer}>
+						<button 
+							class='layer-edit-button'
+							onClick={this.editLayer} 
+							onMouseDown={this.editLayer} 
+							style={{zIndex : 5}}
+							id={option.value}
+						>
+							edit
+						</button>
+					</span> : null
+				}
+			</div>
+		)
+	}
+
 	render(){
 		return(
 			<div style={_.extend({}, this.props.style, {backgroundColor : 'white', zIndex : 1})}>
@@ -114,6 +140,7 @@ export default class RiskMenu extends React.Component{
 						options={this.state.layers}
 						onChange={this.changeLayer}
 						clearable={false}
+						optionRenderer={this.renderOption}
 					/>
 				</div>
 
@@ -130,7 +157,6 @@ export default class RiskMenu extends React.Component{
 									</td>
 							 	</tr>
 							 )
-
 						}
 					</tbody>
 				</table>

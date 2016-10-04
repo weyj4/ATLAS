@@ -91,20 +91,28 @@ class LayerStore extends EventEmitter{
             },
             custom : {
                 value : 'custom',
-                label : 'Build Custom Index',
+                label : 'Build Custom Layer',
             }
         }
     }
 
-    getLayerOptions(){
+    isEditable = (layerName) => {
+        return this.layers[layerName].editable;
+    }
+
+    getLayerOptions = () => {
         var options = []
         for(var field in this.layers){
-            options.push({value : field, label : this.layers[field].label});
+            if(field !== 'custom'){
+                options.push({value : field, label : this.layers[field].label});
+            }
         }
+        //Make sure this one shows up last.
+        options.push({value : 'custom', label : 'Build Custom Layer'});
         return options;
     }
 
-    getLayer(){
+    getLayer = () => {
         return this.layers[this.currentLayer];
     }
 
@@ -117,15 +125,29 @@ class LayerStore extends EventEmitter{
         return this.layerStatus;
     }
 
-    changeLayer(layer){
+    changeLayer = (layer) => {
         this.currentLayer = layer;
         this.emit('change-layer')
     }
 
-    addLayer(layer){
+    addLayer = (layer) => {
+        if(this.editLayer){
+            //If we are editing a layer, clear the old one out
+            delete this.layers[this.editLayer.value];
+            this.editLayer = undefined;
+        }
         this.layers[layer.value] = layer;
         this.currentLayer = layer.value;
         this.emit('change-layer');
+    }
+
+    setEditLayer = (layer) => {
+        this.editLayer = this.layers[layer];
+        this.emit('edit-layer');
+    }
+
+    getEditLayer = () => {
+        return this.editLayer;
     }
 
     handleActions = (action) => {
@@ -138,6 +160,9 @@ class LayerStore extends EventEmitter{
                 break;
             case 'ADD_LAYER':
                 this.addLayer(action.layer);
+                break;
+            case 'EDIT_LAYER':
+                this.setEditLayer(action.layer);
                 break;
         }
     }

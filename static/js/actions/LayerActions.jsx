@@ -19,3 +19,10 @@ export function addLayer(layer){
 		layer : layer
 	})
 }
+
+export function editLayer(layer){
+	dispatcher.dispatch({
+		type : 'EDIT_LAYER',
+		layer : layer
+	})
+}

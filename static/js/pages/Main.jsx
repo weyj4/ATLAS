@@ -5,6 +5,7 @@ import IndexBuilderStore from 'atlas/stores/IndexBuilderStore';
 import * as IndexBuilderActions from 'atlas/actions/IndexBuilderActions';
 import * as _ from 'underscore';
 import IndexBuilder from 'atlas/components/IndexBuilder';
+import LayerStore from 'atlas/stores/LayerStore';
 
 export default class Main extends React.Component{
 
@@ -17,16 +18,25 @@ export default class Main extends React.Component{
 
 	updateBuilderVisibility = () => {
 		this.setState(_.extend({}, this.state, {
-			showIndexBuilder : IndexBuilderStore.getBuilderVisibility()
+			indexBuilder : IndexBuilderStore.getBuilderVisibility() ? <IndexBuilder/> : null
+		}))
+	}
+
+	editLayer = () => {
+		var layer = LayerStore.getEditLayer();
+		this.setState(_.extend({}, this.state, {
+			indexBuilder : <IndexBuilder components={layer.components} layerName={layer.layerName}/>
 		}))
 	}
 
 	componentWillMount() {
 		IndexBuilderStore.on('change-visibility', this.updateBuilderVisibility);
+		LayerStore.on('edit-layer', this.editLayer);
 	}
 
     componentWillUnmount () {
     	IndexBuilderStore.removeListener('change-visibility', this.updateBuilderVisibility);
+    	LayerStore.removeListener('edit-layer', this.editLayer);
     }
 
 	render(){
@@ -35,8 +45,7 @@ export default class Main extends React.Component{
 				<Map style={styles.map}/>
 				<RiskMenu style={styles.riskMenu}/>
 				{
-					this.state.showIndexBuilder ? 
-						<IndexBuilder/> : null
+					this.state.indexBuilder
 				}
 			</div>	
 		)
