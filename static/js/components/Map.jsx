@@ -93,7 +93,6 @@ export default class Map extends React.Component{
 		// occurs and we want to remember what the zoom level is.
 		map.on('zoomend', (z) => {
 			this.state.zoom = map.getZoom();
-			console.log('zoom = ' + this.state.zoom)
 		})
 		this.addMarkers();
 	}
@@ -136,7 +135,6 @@ export default class Map extends React.Component{
 	}
 
 	render(){
-		console.log('zoom = ' + this.state.zoom)
 		return(
 			<div {...this.props}>
 				<Button 
