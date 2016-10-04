@@ -61,6 +61,10 @@ export default class VectorLayer extends MapComponent{
 		                    				.select("svg")
 		                    				.append("g")
 
+		                    var map = component.context.map;
+		                    var strokeWidth = Math.pow(map.getZoom() / map.getMaxZoom(), 3);
+
+
 		                    component.filterPolygons(polygons, geoJson)
 		                    var paths = tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
@@ -68,7 +72,8 @@ export default class VectorLayer extends MapComponent{
 		                      	.attr('class', component.props.id)
 		                        .attr("d", self._path)
 		                        .style('fill-opacity', 0.2)
-		                        .style("stroke-width", "0px")
+		                        .style("stroke-width", `${strokeWidth}px`)
+		                        .style('stroke', '#000000')
 		                        .style('fill', (d) => {
 		                        	polygons[d.gid] = true
 		                        	return component.props.layer.fill(d);
