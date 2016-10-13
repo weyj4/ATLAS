@@ -49,6 +49,8 @@ app.get('/zika_layer/:z/:x/:y.geojson', function(req, res){
 
     console.log(req.query.date)
 
+    debugger
+
     //console.log(`http://${ip}:${port}/water_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
     
     var tile = getBBox(req.params.x, req.params.y, req.params.z);
@@ -59,7 +61,7 @@ json_build_object('department', p.department, 'municipality', p.municipality, 'd
 FROM columbian_municipalities as p INNER JOIN zika as f ON p.municipality=upper(f.municipality) 
 WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND report_date='${req.query.date}')feature;`
 
-//    console.log(q)
+    console.log(q)
     db.query(q).then(function(data){
         var features = data.rows[0].array_to_json ? data.rows[0].array_to_json : [];
         console.log('Serving ' + features.length + ' polygons');
@@ -148,7 +150,7 @@ FROM polygons as p INNER JOIN florida_zika as f ON p.blockid10=f.blockid10 WHERE
 
 app.get('/GetZikaDates', function(req, res){
     db.query('SELECT DISTINCT report_date FROM zika ORDER BY report_date;').then((data) => {
-        res.json(data.rows.map((x) => x.report_date));
+        res.json(data.rows.map((x) => new Date(x.report_date).toDateString()));
     }).catch((err) => {
         console.log(err);
     })
