@@ -6,10 +6,11 @@ import polylabel from 'polylabel';
 import LayerStore from 'atlas/stores/LayerStore';
 import VectorLayer from 'atlas/components/VectorLayer';
 import L from 'leaflet'
-import d3 from 'd3';
 import _ from 'underscore';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
+import d3 from 'd3';
+import ZikaStore from 'atlas/stores/ZikaStore';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -47,7 +48,15 @@ export default class Map extends React.Component{
 		this.addMarkers();
 	}
 
+	updateDate = () => {
+		this.setState(_.extend({}, this.state, {
+			zikaDate : ZikaStore.getDate()
+		}))
+	}
+
 	componentWillMount() {
+		ZikaStore.on('change-dates', this.updateDate);
+		ZikaStore.on('change-date-index', this.updateDate);
         LayerStore.on('change', this.updateLayerState);
         LayerStore.on('change-layer', this.updateLayer);
         LocationStore.on('change-location', this.updateLocation);
@@ -55,19 +64,23 @@ export default class Map extends React.Component{
 	}
 
     componentWillUnmount () {
-    	LayerStore.removeListener('change', this.updateLayerState)
-    	LayerStore.removeListener('change-layer', this.updateLayer)
-    	LocationStore.removeListener('change-location', this.updateLocation)
+    	ZikaStore.removeListener('change-dates', this.updateDate);
+    	ZikaStore.removeListener('change-date-index', this.updateDate);
+    	LayerStore.removeListener('change', this.updateLayerState);
+    	LayerStore.removeListener('change-layer', this.updateLayer);
+    	LocationStore.removeListener('change-location', this.updateLocation);
     }
 
 	constructor(){
 		super()
 		this.markers = [];
+		ZikaStore.on('change-dates change-date-index', this.updateDate);
 		this.state = {
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
 			zoom : 15,
+			zikaDate : ZikaStore.getDate()
 		}
 	}
 
@@ -106,13 +119,6 @@ export default class Map extends React.Component{
 		if(this.state.loi){
 			for(var i = 0; i < this.state.loi.locations.length; i++){
 				var loc = this.state.loi.locations[i];
-
-				/*
-				var icon = L.icon({
-					iconUrl : loc.icon,
-					iconSize : [25, 25]
-				})*/
-
 				var marker = new L.marker({
 					lat : loc.geometry.location.lat(),
 					lng : loc.geometry.location.lng()
@@ -135,6 +141,10 @@ export default class Map extends React.Component{
 	}
 
 	render(){
+		var pallete = d3.scale.linear()
+			.domain([0, 63]).interpolate(d3.interpolateRgb)
+			.range(['blue', 'red'])
+
 		return(
 			<div {...this.props}>
 				<Button 
@@ -153,33 +163,33 @@ export default class Map extends React.Component{
 					scrollWheelZoom={false}
 					onDragEnd={this.moveEnd}
 				>
-				{/*
-				<VectorLayer
-					id={'__id__1'}
-					layer={{
-						value : 'water',
-						label : 'Water',
-						fill : (d) => 'pink'
-					}}
-					endpoint='water_layer/{z}/{x}/{y}.geojson'
-					tooltip={(d, coords) => `Name: ${d.properties.name}`}
-				/>*/}
 				{
-					this.state.showLayer ? 
+					this.state.showLayer && this.state.zikaDate ? 
 						<VectorLayer 
-							id={'__id__2'}
-							layer={this.state.layer}
-							endpoint='test_layer/{z}/{x}/{y}.geojson'
+							id={'__id__1'}
+							layer={{
+								label : 'Columbian Zika',
+				                value : 'columbia_zika',
+				                fill : (d) => {
+				                	return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
+				                },
+				                options : [],
+				                notes : []
+				            }}
+							endpoint={`zika_layer/{z}/{x}/{y}.geojson?date=${this.state.zikaDate}`}
 							tooltip={(d) => {
-								return `ID: ${d.gid}<br/>Population Density: ${d.properties.pop_per_sq_km}<br/>
-		                        	   Zika Risk: ${d.properties.zika_risk}<br/>Care Delivery: ${d.properties.care_delivery}`
+								return `Department: ${d.properties.department}<br/>
+										Municipality: ${d.properties.municipality}<br/>
+										Date: ${d.properties.date}<br/>
+										Clinic Confirmed Cases: ${d.properties.confirmed_clinic}<br/>
+										Confirmed Lab Cases: ${d.properties.confirmed_lab}<br/>
+										Suspected Cases: ${d.properties.suspected}`;
 							}}
-						/> : null
-						
+						/> : null						
 				}
 				<Leaflet.TileLayer
 					url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-			    	attributio	n='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
+			    	attribution='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
 			    />
 				</Leaflet.Map>
 			</div>

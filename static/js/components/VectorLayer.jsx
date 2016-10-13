@@ -12,11 +12,11 @@ export default class VectorLayer extends MapComponent{
 		map : PropTypes.instanceOf(L.Map)
 	};
 
-	filterPolygons(polygons, geoJson){
+	filterPolygons(geoJson){
 		var j = 0;
 		for(var i = 0; i < geoJson.features.length; i++){
-        	if(!polygons[geoJson.features[i].gid]){
-        		polygons[geoJson.features[i].gid] = true;
+        	if(!this.polygons[geoJson.features[i].gid]){
+        		this.polygons[geoJson.features[i].gid] = true;
         		geoJson.features[j] = geoJson.features[i];
         		j++;
         	}
@@ -27,7 +27,7 @@ export default class VectorLayer extends MapComponent{
 	constructor(props){
 		super(props);
 		var component = this;
-		var polygons = {};
+		this.polygons = {};
 		L.TileLayer.d3_topoJSON =  L.TileLayer.extend({
 		    onAdd : function(map) {
 		        L.TileLayer.prototype.onAdd.call(this,map);
@@ -37,7 +37,7 @@ export default class VectorLayer extends MapComponent{
 		            return [point.x,point.y];
 		        });
 		        this.on("tileunload",function(d) {
-		        	polygons = {}
+		        	component.polygons = {}
 		            if (d.tile.xhr) d.tile.xhr.abort();
 		            if (d.tile.nodes) d.tile.nodes.remove();
 		            d.tile.nodes = null;
@@ -62,10 +62,10 @@ export default class VectorLayer extends MapComponent{
 		                    				.append("g")
 
 		                    var map = component.context.map;
-		                    var strokeWidth = Math.pow(map.getZoom() / map.getMaxZoom(), 3);
+		                    var strokeWidth = 1; //Math.pow(map.getZoom() / map.getMaxZoom(), 3) * 2;
 
 
-		                    component.filterPolygons(polygons, geoJson)
+		                    component.filterPolygons(geoJson)
 		                    var paths = tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
@@ -75,7 +75,7 @@ export default class VectorLayer extends MapComponent{
 		                        .style("stroke-width", `${strokeWidth}px`)
 		                        .style('stroke', '#000000')
 		                        .style('fill', (d) => {
-		                        	polygons[d.gid] = true
+		                        	component.polygons[d.gid] = true
 		                        	return component.props.layer.fill(d);
 		                        })
 		                    if(component.props.tooltip){
@@ -121,7 +121,7 @@ export default class VectorLayer extends MapComponent{
 
 	clear = () => {
 		const svg = d3.select(this.context.map._container).select('svg');
-		svg.selectAll('.' + this.props.id).remove();
+		svg.selectAll('*').remove();
 		this.context.map.removeLayer(this.polyLayer);
 	}
 
@@ -132,7 +132,12 @@ export default class VectorLayer extends MapComponent{
 	}
 
 	componentWillReceiveProps(nextProps){
-		if(nextProps.layer !== this.props.layer){
+		if(nextProps.endpoint !== this.props.endpoint){
+			this.clear();
+			this.polygons = {}
+			this.props = nextProps;
+			this.addLayer();
+		}else if(nextProps.layer !== this.props.layer){
 			this.props = nextProps;
 			var selection = d3.select(this.context.map._container)
 				.select('svg')

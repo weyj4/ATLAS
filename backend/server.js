@@ -33,6 +33,42 @@ var projection = new SphericalMercator({
     size: 256
 });
 
+// Compute the bounding box of a tile
+function getBBox(x, y, z){
+    var tile = {}
+    tile.bounds = projection.bbox(x, y, z, false, '900913');
+    tile.bbox = `ST_SetSRID(ST_MakeBox2D(ST_MakePoint(${tile.bounds[0]},${tile.bounds[1]}), 
+ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
+    tile.bbox_4326 = `ST_Transform(${tile.bbox}, 4326)`;
+    tile.geom_hash = 'Substr(MD5(ST_AsBinary(the_geom)), 1, 10)';
+    return tile;
+}
+
+//Zika Layer
+app.get('/zika_layer/:z/:x/:y.geojson', function(req, res){
+
+    console.log(req.query.date)
+
+    //console.log(`http://${ip}:${port}/water_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
+    
+    var tile = getBBox(req.params.x, req.params.y, req.params.z);
+    var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
+(SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
+json_build_object('department', p.department, 'municipality', p.municipality, 'date', report_date, 
+'confirmed_clinic', zika_confirmed_clinic, 'confirmed_lab', zika_confirmed_laboratory, 'suspected', zika_suspected) as properties
+FROM columbian_municipalities as p INNER JOIN zika as f ON p.municipality=upper(f.municipality) 
+WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND report_date='${req.query.date}')feature;`
+
+//    console.log(q)
+    db.query(q).then(function(data){
+        var features = data.rows[0].array_to_json ? data.rows[0].array_to_json : [];
+        console.log('Serving ' + features.length + ' polygons');
+        res.json({type : 'FeatureCollection', features : features})
+    }).catch(function(err){
+        console.log(err)
+    })
+})
+
 app.get('/HighestRisk', function(req, res){
     var query = `SELECT ST_AsGeoJSON(geom)::json as geometry FROM polygons WHERE polygons.blockid10=
                  (SELECT blockid10 FROM florida_zika WHERE care_delivery=False AND zika_risk=true
@@ -46,14 +82,8 @@ app.get('/HighestRisk', function(req, res){
 
 app.get('/water_layer/:z/:x/:y.geojson', function(req, res){
     console.log(`http://${ip}:${port}/water_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
-    // Compute the bounding box of the supplied coordinates
-    var tile = {}
-    tile.bounds = projection.bbox(req.params.x, req.params.y, req.params.z, false, '900913');
-    tile.bbox = `ST_SetSRID(ST_MakeBox2D(ST_MakePoint(${tile.bounds[0]},${tile.bounds[1]}), 
-ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
-    tile.bbox_4326 = `ST_Transform(${tile.bbox}, 4326)`;
-    tile.geom_hash = 'Substr(MD5(ST_AsBinary(the_geom)), 1, 10)';
 
+    var tile = getBBox(req.params.x, req.params.y, req.params.z);
     var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
 (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
 json_build_object('name', gnis_name) as properties
@@ -80,14 +110,7 @@ app.get('/test_layer/:z/:x/:y.geojson', function(req, res){
 
     console.log(`http://${ip}:${port}/test_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
 
-    // Compute the bounding box of the supplied coordinates
-    var tile = {}
-    tile.bounds = projection.bbox(req.params.x, req.params.y, req.params.z, false, '900913');
-    tile.bbox = `ST_SetSRID(ST_MakeBox2D(ST_MakePoint(${tile.bounds[0]},${tile.bounds[1]}), 
-ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
-    tile.bbox_4326 = `ST_Transform(${tile.bbox}, 4326)`;
-    tile.geom_hash = 'Substr(MD5(ST_AsBinary(the_geom)), 1, 10)';
-
+    var tile = getBBox(req.params.x, req.params.y, req.params.z);
     var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
 (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
 json_build_object('zika_risk', zika_risk, 'pop_per_sq_km', pop_per_sq_km, 'care_delivery', care_delivery) as properties
@@ -106,13 +129,7 @@ FROM polygons as p INNER JOIN florida_zika as f ON p.blockid10=f.blockid10 WHERE
 app.get('/test_layer/:z/:x/:y.topojson', function(req, res){
 
     console.log(`http://${ip}:${port}/test_layer/${req.params.z}/${req.params.x}/${req.params.y}.topojson`)
-    // Compute the bounding box of the supplied coordinates
-    var tile = {}
-    tile.bounds = projection.bbox(req.params.x, req.params.y, req.params.z, false, '900913');
-    tile.bbox = `ST_SetSRID(ST_MakeBox2D(ST_MakePoint(${tile.bounds[0]},${tile.bounds[1]}), 
-ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
-    tile.bbox_4326 = `ST_Transform(${tile.bbox}, 4326)`;
-    tile.geom_hash = 'Substr(MD5(ST_AsBinary(the_geom)), 1, 10)';
+    var tile = getBBox(req.params.x, req.params.y, req.params.z);
 
     var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
 (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
@@ -129,7 +146,13 @@ FROM polygons as p INNER JOIN florida_zika as f ON p.blockid10=f.blockid10 WHERE
     })
 })
 
-
+app.get('/GetZikaDates', function(req, res){
+    db.query('SELECT DISTINCT report_date FROM zika ORDER BY report_date;').then((data) => {
+        res.json(data.rows.map((x) => x.report_date));
+    }).catch((err) => {
+        console.log(err);
+    })
+})
 
 app.listen(port, ip, function (err) {
     if (err) {

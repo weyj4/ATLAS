@@ -6,7 +6,9 @@ class LocationStore extends EventEmitter{
     constructor(){
         super();
         // Default location.  Some place in Florida...
-        this.location = {lat : 29.367493, lng : -82.003767}
+        //this.location = {lat : 29.367493, lng : -82.003767}
+        // Default location.  Some place in Columbia...
+        this.location = {lat : 6.2716, lng : -75.6573};
         this.bounds = undefined;
         this.locations = [];
         this.locationsBB = undefined;
