@@ -79,19 +79,9 @@ export default class Map extends React.Component{
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
-			zoom : 15,
+			zoom : 9,
 			zikaDate : ZikaStore.getDate()
 		}
-	}
-
-	gotoHighestRisk = (event) => {
-		event.target.blur()
-		$.get(`${BACKEND_URL}/HighestRisk`).then((res) => {
-			var temp = res[1]
-			res[1] = res[0];
-			res[0] = temp;
-			this.refs.map.leafletElement.panTo(res)
-		})
 	}
 
 	moveEnd = (loc) => {
@@ -147,13 +137,6 @@ export default class Map extends React.Component{
 
 		return(
 			<div {...this.props}>
-				<Button 
-					bsStyle="danger" 
-					style={{right : 10, top : 10, zIndex : 2, position : 'absolute'}}
-					onClick={this.gotoHighestRisk}
-				>
-					Highest Risk
-				</Button>
 				<Leaflet.Map 
 					ref='map'
 					id='map'
@@ -171,6 +154,9 @@ export default class Map extends React.Component{
 								label : 'Columbian Zika',
 				                value : 'columbia_zika',
 				                fill : (d) => {
+				                	if(d.properties.confirmed_lab == null){
+				                		console.log('null')
+				                	}
 				                	return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
 				                },
 				                options : [],

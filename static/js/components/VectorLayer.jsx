@@ -14,7 +14,7 @@ export default class VectorLayer extends MapComponent{
 
 	filterPolygons(geoJson){
 		var j = 0;
-		for(var i = 0; i < geoJson.features.length; i++){
+		for(var i = 0; i < geoJson.features.length; i++)	{
         	if(!this.polygons[geoJson.features[i].gid]){
         		this.polygons[geoJson.features[i].gid] = true;
         		geoJson.features[j] = geoJson.features[i];
@@ -64,14 +64,13 @@ export default class VectorLayer extends MapComponent{
 		                    var map = component.context.map;
 		                    var strokeWidth = 1; //Math.pow(map.getZoom() / map.getMaxZoom(), 3) * 2;
 
-
 		                    component.filterPolygons(geoJson)
 		                    var paths = tile.nodes.selectAll("path")
 		                        .data(geoJson.features).enter()
 		                      .append("path")
 		                      	.attr('class', component.props.id)
 		                        .attr("d", self._path)
-		                        .style('fill-opacity', 0.2)
+		                        //.style('fill-opacity', 1)
 		                        .style("stroke-width", `${strokeWidth}px`)
 		                        .style('stroke', '#000000')
 		                        .style('fill', (d) => {
