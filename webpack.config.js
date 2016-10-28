@@ -19,6 +19,13 @@ module.exports = {
   module: {
     loaders: [
       {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        loaders: [
+          'file?name=images/[hash].[ext]'
+        ],
+        include : path.resolve(path.join(__dirname, 'static/images'))
+      },
+      {
         test: /\.jsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
@@ -40,6 +47,7 @@ module.exports = {
         test: /\.css$/,
         loader: "style-loader!css-loader"
       }
+      
     ]    
   },
   output: {

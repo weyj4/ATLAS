@@ -11,6 +11,7 @@ import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
 import d3 from 'd3';
 import ZikaStore from 'atlas/stores/ZikaStore';
+import MapStore from 'atlas/stores/MapStore';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -54,6 +55,11 @@ export default class Map extends React.Component{
 		}))
 	}
 
+	updateMarkers = () => {
+		this.state.markers = MapStore.getMarkers();
+		this.addMarkers();
+	}
+
 	componentWillMount() {
 		ZikaStore.on('change-dates', this.updateDate);
 		ZikaStore.on('change-date-index', this.updateDate);
@@ -61,6 +67,7 @@ export default class Map extends React.Component{
         LayerStore.on('change-layer', this.updateLayer);
         LocationStore.on('change-location', this.updateLocation);
         LocationStore.on('new-loi', this.updateLocationsOfInterest);
+        MapStore.on('new-marker', this.updateMarkers);
 	}
 
     componentWillUnmount () {
@@ -69,6 +76,7 @@ export default class Map extends React.Component{
     	LayerStore.removeListener('change', this.updateLayerState);
     	LayerStore.removeListener('change-layer', this.updateLayer);
     	LocationStore.removeListener('change-location', this.updateLocation);
+    	MapStore.on('new-marker', this.updateMarkers);
     }
 
 	constructor(){
@@ -80,7 +88,8 @@ export default class Map extends React.Component{
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
 			zoom : 9,
-			zikaDate : ZikaStore.getDate()
+			zikaDate : ZikaStore.getDate(),
+			markers : []
 		}
 	}
 
@@ -91,6 +100,7 @@ export default class Map extends React.Component{
 
 	componentDidMount(){
 		var map = this.refs.map.leafletElement;
+		MapStore.setMap(map);
 		// Keep track of the zoom level.  Don't actually set the state
 		// though, this is only necessary when a different state change
 		// occurs and we want to remember what the zoom level is.
@@ -127,6 +137,18 @@ export default class Map extends React.Component{
 				this.markers.push(marker);
 			}
 			map.fitBounds(this.state.loi.bounds);
+		}
+
+		// Add user created markers
+		for(var i = 0; i < this.state.markers.length; i++){
+			var icon = L.icon({
+				iconUrl : this.state.markers[i].img,
+				iconSize : [30, 30]
+			})
+			var point = L.marker(this.state.markers[i].location, {
+				icon : icon
+			}).addTo(map);
+			this.markers.push(point);
 		}
 	}
 
