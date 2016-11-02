@@ -2,6 +2,9 @@ import React from 'react';
 import * as _ from 'lodash';
 import * as MapActions from 'atlas/actions/MapActions';
 import MapStore from 'atlas/stores/MapStore';
+import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions';
+import turf from 'turf';
+
 
 export default class Legend extends React.Component{
 
@@ -22,7 +25,20 @@ export default class Legend extends React.Component{
 			stop : function(event, ui){
 				var pos = [ui.offset.left + (ui.helper.width()/2), ui.offset.top];
 				var latLng = MapStore.containerPointToLatLng(pos)
-				MapActions.addMarker(latLng, require('atlas/../images/triangle.png'))
+
+				var point = turf.point([latLng.lng, latLng.lat]);
+				var results = MapStore.lookupRTree(latLng);
+				var result = _.filter(results, p => turf.inside(point, p));
+
+				if(result.length != 1){
+					console.log('Error, result')
+				}else{
+					InstructionEditorActions.showEditor({
+						polygon : result[0],
+						coordinates : latLng,
+						icon : require('atlas/../images/triangle.png')
+					})
+				}
 			}
 		})
 	}
@@ -77,7 +93,7 @@ export default class Legend extends React.Component{
 						/>	
 					</div>
 					<div style={styles.addPinText}>
-						ADD A PIN
+						ADD PIN
 					</div>
 				</div>
 			</div>
@@ -118,7 +134,7 @@ const styles = {
 		top : '8.04%',
 		//height : '77.71%',
 		height : '95%',
-		width : '11.75%',
+		width : '11%',
 	},
 	pinContainer : {
 		borderRadius : 20,

@@ -49,8 +49,6 @@ app.get('/zika_layer/:z/:x/:y.geojson', function(req, res){
 
     console.log(req.query.date)
 
-    debugger
-
     //console.log(`http://${ip}:${port}/water_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
     
     var tile = getBBox(req.params.x, req.params.y, req.params.z);
@@ -58,7 +56,7 @@ app.get('/zika_layer/:z/:x/:y.geojson', function(req, res){
 (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
 json_build_object('department', p.department, 'municipality', p.municipality, 'date', report_date, 
 'confirmed_clinic', zika_confirmed_clinic, 'confirmed_lab', zika_confirmed_laboratory, 'suspected', zika_suspected) as properties
-FROM columbian_municipalities as p INNER JOIN zika as f ON p.municipality=upper(f.municipality) 
+FROM columbian_municipalities as p LEFT JOIN zika as f ON p.municipality=upper(f.municipality) 
 WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND report_date='${req.query.date}')feature;`
 
     console.log(q)

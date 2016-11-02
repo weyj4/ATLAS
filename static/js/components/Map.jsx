@@ -6,12 +6,13 @@ import polylabel from 'polylabel';
 import LayerStore from 'atlas/stores/LayerStore';
 import VectorLayer from 'atlas/components/VectorLayer';
 import L from 'leaflet'
-import _ from 'underscore';
+import * as _ from 'lodash';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
 import d3 from 'd3';
 import ZikaStore from 'atlas/stores/ZikaStore';
 import MapStore from 'atlas/stores/MapStore';
+import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -87,7 +88,7 @@ export default class Map extends React.Component{
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
-			zoom : 9,
+			zoom : 11,
 			zikaDate : ZikaStore.getDate(),
 			markers : []
 		}
@@ -140,16 +141,21 @@ export default class Map extends React.Component{
 		}
 
 		// Add user created markers
-		for(var i = 0; i < this.state.markers.length; i++){
+		_.forEach(this.state.markers, marker => {
 			var icon = L.icon({
-				iconUrl : this.state.markers[i].img,
-				iconSize : [30, 30]
+				iconUrl : marker.icon,
+				iconSize : [30,30]
 			})
-			var point = L.marker(this.state.markers[i].location, {
+			var point = L.marker(marker.coordinates, {
 				icon : icon
 			}).addTo(map);
+
+			point.on('click', () => {
+				InstructionEditorActions.showEditor(marker)
+			})
+
 			this.markers.push(point);
-		}
+		})
 	}
 
 	render(){

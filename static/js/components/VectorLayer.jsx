@@ -2,6 +2,7 @@ import React, {PropTypes} from 'react';
 import {MapComponent} from 'react-leaflet';
 import polylabel from 'polylabel';
 var L = require('leaflet');
+import MapStore from 'atlas/stores/MapStore';
 
 const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
 				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
@@ -28,6 +29,7 @@ export default class VectorLayer extends MapComponent{
 		super(props);
 		var component = this;
 		this.polygons = {};
+		MapStore.clearRTree();
 		L.TileLayer.d3_topoJSON =  L.TileLayer.extend({
 		    onAdd : function(map) {
 		        L.TileLayer.prototype.onAdd.call(this,map);
@@ -38,6 +40,7 @@ export default class VectorLayer extends MapComponent{
 		        });
 		        this.on("tileunload",function(d) {
 		        	component.polygons = {}
+					MapStore.clearRTree();
 		            if (d.tile.xhr) d.tile.xhr.abort();
 		            if (d.tile.nodes) d.tile.nodes.remove();
 		            d.tile.nodes = null;
@@ -70,7 +73,7 @@ export default class VectorLayer extends MapComponent{
 		                      .append("path")
 		                      	.attr('class', component.props.id)
 		                        .attr("d", self._path)
-		                        //.style('fill-opacity', 1)
+		                        .style('fill-opacity', 0.7)
 		                        .style("stroke-width", `${strokeWidth}px`)
 		                        .style('stroke', '#000000')
 		                        .style('fill', (d) => {
@@ -82,6 +85,9 @@ export default class VectorLayer extends MapComponent{
 				                    component.tooltipPolygonInfo.html(component.props.tooltip(d))
 				                })
 		                    }
+
+		                    MapStore.addFeaturesToRTree(geoJson);
+
 		                }
 		            });
 		        }
@@ -134,6 +140,7 @@ export default class VectorLayer extends MapComponent{
 		if(nextProps.endpoint !== this.props.endpoint){
 			this.clear();
 			this.polygons = {}
+			MapStore.clearRTree();
 			this.props = nextProps;
 			this.addLayer();
 		}else if(nextProps.layer !== this.props.layer){
