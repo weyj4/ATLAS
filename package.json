@@ -43,6 +43,7 @@
     "rtree": "^1.4.2",
     "sphericalmercator": "^1.0.5",
     "style-loader": "^0.13.1",
+    "textbelt": "0.0.3",
     "topojson": "^1.6.27",
     "transform-loader": "^0.2.3",
     "turf": "^3.0.14",

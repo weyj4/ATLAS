@@ -9,6 +9,10 @@ var SphericalMercator = require('sphericalmercator');
 var _ = require('underscore')
 var turf = require('turf')
 var topojson = require('topojson')
+var textbelt = require('textbelt');
+//var spawn = require('child_process').spawn;
+var exec = require('child_process').exec
+//import {spawn, exec} from 'child_process';
 
 var config = _.extend({database : 'atlas'}, process.env.AWS_IP ? {
     user : process.env.DB_USER,
@@ -151,6 +155,31 @@ app.get('/GetZikaDates', function(req, res){
         res.json(data.rows.map((x) => new Date(x.report_date).toDateString()));
     }).catch((err) => {
         console.log(err);
+    })
+})
+
+app.get('/Email', function(req, res){
+    var address = req.query.address;
+    var text = req.query.text;
+    console.log(`echo "${text}" | mutt -s "Message from ATLAS" ${address}`)
+    exec(`echo "${text}" | mutt -s "Message from ATLAS" ${address}`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.log(`stderr: ${stderr}`);
+    })
+})
+
+app.get('/Text', function(req, res){
+    var number = req.query.number;
+    var text = req.query.text;
+    console.log(`Sending ${number}: ${text}`)
+    textbelt.sendText(number, text, function(err){
+        if(err){
+            console.log(err);
+        }
     })
 })
 

@@ -4,11 +4,66 @@ import * as InstructionEditorActions from 'atlas/actions/InstructionEditorAction
 import InstructionEditorStore from 'atlas/stores/InstructionEditorStore';
 import * as MapActions from 'atlas/actions/MapActions';
 import update from 'react/lib/update';
+import {BACKEND_URL} from 'atlas/Constants';
 
 String.prototype.capFirstLetter = function(){
 	return this.charAt(0) + this.slice(1).toLowerCase();
 }
 
+class MessageSender extends React.Component{
+	constructor(props){
+		super(props);
+		this.state = {
+			dest : ''
+		}
+	}
+
+	updateDest = (event) => {
+		this.setState(_.extend({}, this.state, {
+			dest : event.target.value
+		}))
+	}
+
+	render(){
+		return(
+			<div class="container-fluid">
+				<div class="row">
+					<p style={{fontSize : 20, textAlign : 'center', color : 'rgb(125,125,125)', marginTop : '5%'}}>
+						{this.props.label}
+					</p>
+				</div>
+				<div style={styles.textBox}>
+					<input
+						type="text"
+						style={{textAlign : 'center', borderRadius : 20}}
+						onChange={this.updateDest}
+						value={this.state.dest}
+					/>
+				</div>
+
+				<div>
+					<div class="row" style={{marginTop : 40}}>
+						<div class="col-xs-3"></div>
+						<div class="col-xs-6">
+							<SafeAnchor style={{textDecoration : 'none'}} onClick={() => this.props.sendMessage(this.state.dest, this.props.marker.text)}>
+								<div 
+									style={_.extend({}, styles.button, {
+										height : '100%',
+										width : '100%'
+									})}
+								>
+							        <p style={{textAlign : 'center', verticalAlign : 'middle', lineHeight : '40px'}}>
+							        	SEND MESSAGE
+							        </p>
+						        </div>
+					        </SafeAnchor>
+				        </div>
+			        </div>
+		        </div>
+			</div>
+		)
+	}
+}
 
 class MsgSender extends React.Component{
 	constructor(props){
@@ -17,17 +72,19 @@ class MsgSender extends React.Component{
 	}
 
 	text = () => {
-		InstructionEditorActions.hideEditor();
-		MapActions.addMarker(this.state.marker);
+		this.setState(_.extend({}, this.state, {
+			sendMessage : 'Text',
+		}))
 	}
 
 	email = () => {
-		InstructionEditorActions.hideEditor();
-		MapActions.addMarker(this.state.marker);
+		this.setState(_.extend({}, this.state, {
+			sendMessage : 'Email',
+		}))
 	}
 
 	render(){
-		return(
+		var component = (
 			<div class="container-fluid">
 				<div class="row">
 					<p style={{fontSize : 20, textAlign : 'center', color : 'rgb(125,125,125)', marginTop : '5%'}}>
@@ -63,7 +120,34 @@ class MsgSender extends React.Component{
 					)
 				}
 			</div>
-		)
+		);
+		switch(this.state.sendMessage){
+			case 'Text':
+				return <MessageSender 
+							marker={this.state.marker}
+							label="Enter Number"
+							sendMessage={(number, message) => {
+								$.post(`http://textbelt.com/text`, {
+									number : number,
+									message : message
+								})
+								InstructionEditorActions.hideEditor();
+								MapActions.addMarker(this.props.marker);
+							}}
+						/>
+			case 'Email':
+				return <MessageSender 
+							marker={this.state.marker}
+							label="Enter Email Address"
+							sendMessage={(address, message) => {
+								$.get(`${BACKEND_URL}/Email?address=${address}&text=${message}`)
+								InstructionEditorActions.hideEditor();
+								MapActions.addMarker(this.props.marker);
+							}}
+						/>
+			default:
+				return component;
+		}
 	}	
 }
 
@@ -81,7 +165,6 @@ export default class InstructionEditor extends React.Component{
 	}
 
 	send = () => {
-
 		this.setState(_.extend({}, this.state, {sendMessage : true}))
 	}
 
