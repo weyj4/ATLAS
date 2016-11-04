@@ -13,10 +13,12 @@ import d3 from 'd3';
 import ZikaStore from 'atlas/stores/ZikaStore';
 import MapStore from 'atlas/stores/MapStore';
 import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions';
-
-const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
-				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
-				'http://localhost:8080'
+import {
+	INVISIBLE_COLOR,
+	IDENTIFIABLE_COLOR,
+	DELIVERABLE_COLOR,
+	BACKEND_URL
+} from 'atlas/Constants';
 
 const DG_API_KEY='pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
 
@@ -194,6 +196,7 @@ export default class Map extends React.Component{
 							tooltip={(d) => {
 								return `Department: ${d.properties.department}<br/>
 										Municipality: ${d.properties.municipality}<br/>
+										Population: ${d.properties.pop.toLocaleString()}<br/>
 										Date: ${d.properties.date}<br/>
 										Clinic Confirmed Cases: ${d.properties.confirmed_clinic}<br/>
 										Confirmed Lab Cases: ${d.properties.confirmed_lab}<br/>

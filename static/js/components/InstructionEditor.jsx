@@ -181,6 +181,7 @@ export default class InstructionEditor extends React.Component{
 			Coordinates : `(${this.state.marker.coordinates.lat.toFixed(4)}, ${this.state.marker.coordinates.lng.toFixed(4)})`,
 			Department : this.state.marker.polygon.properties.department,
 			Municipality : this.state.marker.polygon.properties.municipality,
+			Population : this.state.marker.polygon.properties.pop.toLocaleString(),
 			Date : this.state.marker.polygon.properties.date,
 			'Clinic Confirmed Cases' : this.state.marker.polygon.properties.confirmed_clinic,
 			'Lab Confirmed Cases' : this.state.marker.polygon.properties.confirmed_lab,
@@ -204,7 +205,7 @@ export default class InstructionEditor extends React.Component{
 				<div style={{marginTop : 30, marginLeft : 20}}>
 				{
 					Object.keys(info).map(k => 
-						<div style={{textAlign : 'left'}} key={k}>
+						<div style={{textAlign : 'left', marginTop : -5}} key={k}>
 							<p><b>{k}</b>: {typeof(info[k]) == 'string' ? info[k].capFirstLetter() : info[k]}</p>
 						</div>
 					)
