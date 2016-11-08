@@ -161,9 +161,9 @@ export default class Map extends React.Component{
 	}
 
 	render(){
-		var pallete = d3.scale.linear()
-			.domain([0, 63]).interpolate(d3.interpolateRgb)
-			.range(['blue', 'red'])
+		// var pallete = d3.scale.linear()
+		// 	.domain([0, 63]).interpolate(d3.interpolateRgb)
+		// 	.range(['blue', 'red'])
 
 		return(
 			<div {...this.props}>
@@ -184,10 +184,21 @@ export default class Map extends React.Component{
 								label : 'Columbian Zika',
 				                value : 'columbia_zika',
 				                fill : (d) => {
-				                	if(d.properties.confirmed_lab == null){
-				                		console.log('null')
+
+				                	if(!d.properties.confirmed_lab || !d.properties.confirmed_clinic || !d.properties.suspected){
+				                		//missing health data
+				                		if(!d.properties.pop){
+				                			return INVISIBLE_COLOR;
+				                		}
+				                		return IDENTIFIABLE_COLOR;
+				                	}else{
+				                		return DELIVERABLE_COLOR;
 				                	}
-				                	return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
+
+				                	// if(d.properties.confirmed_lab == null){
+				                	// 	console.log('null')
+				                	// }
+				                	// return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
 				                },
 				                options : [],
 				                notes : []
@@ -196,8 +207,8 @@ export default class Map extends React.Component{
 							tooltip={(d) => {
 								return `Department: ${d.properties.department}<br/>
 										Municipality: ${d.properties.municipality}<br/>
-										Population: ${d.properties.pop.toLocaleString()}<br/>
-										Date: ${d.properties.date}<br/>
+										Population: ${d.properties.pop ? d.properties.pop.toLocaleString() : 'Missing Population Data'}<br/>
+										Date: ${this.state.zikaDate}<br/>
 										Clinic Confirmed Cases: ${d.properties.confirmed_clinic}<br/>
 										Confirmed Lab Cases: ${d.properties.confirmed_lab}<br/>
 										Suspected Cases: ${d.properties.suspected}`;

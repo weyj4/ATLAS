@@ -177,15 +177,16 @@ export default class InstructionEditor extends React.Component{
 	}
 
 	render(){
+		var props = this.state.marker.polygon.properties;
 		var info = {
 			Coordinates : `(${this.state.marker.coordinates.lat.toFixed(4)}, ${this.state.marker.coordinates.lng.toFixed(4)})`,
-			Department : this.state.marker.polygon.properties.department,
-			Municipality : this.state.marker.polygon.properties.municipality,
-			Population : this.state.marker.polygon.properties.pop.toLocaleString(),
-			Date : this.state.marker.polygon.properties.date,
-			'Clinic Confirmed Cases' : this.state.marker.polygon.properties.confirmed_clinic,
-			'Lab Confirmed Cases' : this.state.marker.polygon.properties.confirmed_lab,
-			'Suspected Cases' : this.state.marker.polygon.properties.suspected,
+			Department : props.department,
+			Municipality : props.municipality,
+			Population : props.pop ? props.pop.toLocaleString() : 'Missing Population Info',
+			Date : props.date,
+			'Clinic Confirmed Cases' : props.confirmed_clinic ? props.confirmed_clinic : 'Missing Clinic Cases',
+			'Lab Confirmed Cases' : props.confirmed_lab ? props.confirmed_lab : 'Missing Lab Cases',
+			'Suspected Cases' : props.suspected ? props.suspected : 'Missing Suspected Cases',
 		}
 
 		return(

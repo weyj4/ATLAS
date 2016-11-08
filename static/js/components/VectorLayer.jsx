@@ -73,7 +73,7 @@ export default class VectorLayer extends MapComponent{
 		                      .append("path")
 		                      	.attr('class', component.props.id)
 		                        .attr("d", self._path)
-		                        .style('fill-opacity', 0.7)
+//		                        .style('fill-opacity', 0.7)
 		                        .style("stroke-width", `${strokeWidth}px`)
 		                        .style('stroke', '#000000')
 		                        .style('fill', (d) => {
