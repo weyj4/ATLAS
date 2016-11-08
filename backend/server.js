@@ -55,15 +55,35 @@ app.get('/zika_layer/:z/:x/:y.geojson', function(req, res){
 
     //console.log(`http://${ip}:${port}/water_layer/${req.params.z}/${req.params.x}/${req.params.y}.geojson`)
     
-    var IJOIN='(SELECT p.*, value as pop FROM colombian_municipalities AS p INNER JOIN colombian_pop pop ON p.dpto=pop.dpt AND p.mpio=pop.mpio) p'
+    var IJOIN='(SELECT p.*, value as pop, dpmp FROM colombian_municipalities AS p INNER JOIN colombian_pop pop ON p.dpto=pop.dpt AND p.mpio=pop.mpio) p'
 
     var tile = getBBox(req.params.x, req.params.y, req.params.z);
-    var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
-(SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
-json_build_object('pop', p.pop, 'department', p.department, 'municipality', p.municipality, 'date', report_date, 
-'confirmed_clinic', zika_confirmed_clinic, 'confirmed_lab', zika_confirmed_laboratory, 'suspected', zika_suspected) as properties
-FROM ${IJOIN} LEFT JOIN zika as f ON p.municipality=f.municipality 
-WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND report_date='${req.query.date}')feature;`
+
+    var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM
+                (
+                    SELECT 'Feature' as type, 
+                            gid, 
+                            ST_AsGeoJSON(geom)::json as geometry,
+                            json_build_object(  
+                                'pop', p.pop,
+                                'department', p.department,
+                                'municipality', p.municipality,
+                                'date', report_date,
+                                'confirmed_clinic', zika_confirmed_clinic,
+                                'confirmed_lab', zika_confirmed_laboratory,
+                                'suspected', zika_suspected
+                            ) as properties FROM ${IJOIN} LEFT JOIN (
+                                SELECT * FROM zika WHERE report_date='${req.query.date}'
+                            ) zika ON p.dpmp=zika.id WHERE ST_Intersects(geom, ${tile.bbox_4326})
+                )feature;`
+
+
+//     var q = `SELECT array_to_json(array_agg(row_to_json(feature))) FROM 
+// (SELECT 'Feature' as type, gid, ST_AsGeoJSON(geom)::json as geometry,
+// json_build_object('pop', p.pop, 'department', p.department, 'municipality', p.municipality, 'date', report_date, 
+// 'confirmed_clinic', zika_confirmed_clinic, 'confirmed_lab', zika_confirmed_laboratory, 'suspected', zika_suspected) as properties
+// FROM ${IJOIN} LEFT JOIN zika as f ON p.municipality=f.municipality 
+// WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND report_date='${req.query.date}')feature;`
 
     console.log(q)
     db.query(q).then(function(data){
