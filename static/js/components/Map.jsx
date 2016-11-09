@@ -79,9 +79,9 @@ export default class Map extends React.Component{
 			MapStore.addFeaturesToRTree(result);
 			MessageActions.clearLoadingMsg()
 			this.setState(_.extend({}, this.state, {features : result}));
-    }).fail(err => {
-      console.log(err)
-    })
+	    }).fail(err => {
+	      console.log(err)
+	    })
 
 		this.setState(_.extend({}, this.state, {
 			zikaDate : date
@@ -129,6 +129,9 @@ export default class Map extends React.Component{
 			zoom : 8,
 			zikaDate : ZikaStore.getDate(),
 			markers : []
+		}
+		if(this.state.zikaDate){
+			this.updateDate()
 		}
 	}
 
