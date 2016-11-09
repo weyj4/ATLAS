@@ -1,53 +1,66 @@
-import {EventEmitter} from 'events';
-import dispatcher from '../Dispatcher';
-import rtree from 'rtree';
+import { EventEmitter } from 'events'
+import dispatcher from '../Dispatcher'
+import rtree from 'rtree'
+import turf from 'turf'
+import * as _ from 'lodash'
 
-class MapStore extends EventEmitter{
-	constructor(){
-		super();
-		this.markers = [];
-		this.rtree = rtree();
-	}
+class MapStore extends EventEmitter {
+  constructor () {
+    super()
+    this.markers = []
+    this.rtree = rtree()
+  }
 
-	setMap(map){
-		this.map = map;
-	}
+  getFeatures = () => {
+    return this.features
+  }
 
-	addMarker = (marker) => {
-		this.markers.push(marker);
-		this.emit('new-marker');
-	}
+  setMap (map) {
+    this.map = map
+  }
 
-	getMarkers = () => {
-		return this.markers;
-	}
+  addMarker = (marker) => {
+    this.markers.push(marker)
+    this.emit('new-marker')
+  }
 
-	addFeaturesToRTree = (features) => {
-		this.rtree.geoJSON(features);
-	}
+  getMarkers = () => {
+    return this.markers
+  }
 
-	lookupRTree = (point) => {
-		return this.rtree.search({x : point.lng, y : point.lat, w : 0, h : 0});
-	}
+  addFeaturesToRTree = (features) => {
+    this.rtree.geoJSON(features)
+  }
 
-	clearRTree = () => {
-		this.rtree = rtree();
-	}
+  lookupRTree = (point) => {
+    var candidates = this.rtree.search({x: point.lng, y: point.lat, w: 0, h: 0})
+    var point = turf.point([point.lng, point.lat])
+    candidates = _.filter(candidates, p => turf.inside(point, p))
 
-	containerPointToLatLng = (point) => {
-		return this.map.containerPointToLatLng(point);
-	}
+    if (candidates.length != 1) {
+      return undefined
+    }else {
+      return candidates[0]
+    }
+  }
 
-	handleActions = (event) => {
-		switch(event.type){
-			case 'NEW_MARKER':
-				this.addMarker(event);
-				break;
-		}
-	}
+  clearRTree = () => {
+    this.rtree = rtree()
+  }
+
+  containerPointToLatLng = (point) => {
+    return this.map.containerPointToLatLng(point)
+  }
+
+  handleActions = (event) => {
+    switch (event.type) {
+      case 'NEW_MARKER':
+        this.addMarker(event)
+        break
+    }
+  }
 }
 
-
-const mapStore = new MapStore();
-dispatcher.register(mapStore.handleActions);
-export default mapStore;
+const mapStore = new MapStore()
+dispatcher.register(mapStore.handleActions)
+export default mapStore

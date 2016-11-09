@@ -13,12 +13,14 @@ import d3 from 'd3';
 import ZikaStore from 'atlas/stores/ZikaStore';
 import MapStore from 'atlas/stores/MapStore';
 import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions';
+import GeoJSONVTLayer from 'atlas/components/GeoJSONVTLayer';
+
 import {
 	INVISIBLE_COLOR,
 	IDENTIFIABLE_COLOR,
 	DELIVERABLE_COLOR,
 	BACKEND_URL
-} from 'atlas/Constants';
+} from 'atlas/Constants'; 
 
 const DG_API_KEY='pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
 
@@ -53,14 +55,27 @@ export default class Map extends React.Component{
 	}
 
 	updateDate = () => {
+		var date = ZikaStore.getDate();
+		console.log(`${BACKEND_URL}/zika_layer_all&date=${date}`)
+		$.get(`${BACKEND_URL}/zika_layer_all?date=${date}`).done(result => {
+			MapStore.addFeaturesToRTree(result);
+			this.setState(_.extend({}, this.state, {features : result}));
+    }).fail(err => {
+      console.log(err)
+    })
+
 		this.setState(_.extend({}, this.state, {
-			zikaDate : ZikaStore.getDate()
+			zikaDate : date
 		}))
 	}
 
 	updateMarkers = () => {
 		this.state.markers = MapStore.getMarkers();
 		this.addMarkers();
+	}
+
+	updateFeatures = () => {
+		this.setState(_.extend({}, this.state, {features : MapStore.getFeatures()}))
 	}
 
 	componentWillMount() {
@@ -71,6 +86,7 @@ export default class Map extends React.Component{
         LocationStore.on('change-location', this.updateLocation);
         LocationStore.on('new-loi', this.updateLocationsOfInterest);
         MapStore.on('new-marker', this.updateMarkers);
+        MapStore.on('new-features', this.updateFeatures);
 	}
 
     componentWillUnmount () {
@@ -79,7 +95,8 @@ export default class Map extends React.Component{
     	LayerStore.removeListener('change', this.updateLayerState);
     	LayerStore.removeListener('change-layer', this.updateLayer);
     	LocationStore.removeListener('change-location', this.updateLocation);
-    	MapStore.on('new-marker', this.updateMarkers);
+    	MapStore.removeListener('new-marker', this.updateMarkers);
+    	MapStore.removeListener('new-features', this.updateFeatures);
     }
 
 	constructor(){
@@ -90,7 +107,7 @@ export default class Map extends React.Component{
 			showLayer : LayerStore.getLayerStatus(),
 			loc : LocationStore.getLocation(),
 			layer : LayerStore.getLayer(),
-			zoom : 11,
+			zoom : 8,
 			zikaDate : ZikaStore.getDate(),
 			markers : []
 		}
@@ -177,14 +194,14 @@ export default class Map extends React.Component{
 					onDragEnd={this.moveEnd}
 				>
 				{
-					this.state.showLayer && this.state.zikaDate ? 
-						<VectorLayer 
+					this.state.showLayer && this.state.zikaDate && this.state.features ? 
+						<GeoJSONVTLayer
 							id={'__id__1'}
+							features={this.state.features}
 							layer={{
 								label : 'Columbian Zika',
 				                value : 'columbia_zika',
 				                fill : (d) => {
-
 				                	if(d.properties.confirmed_lab == undefined || 
 				                	   d.properties.confirmed_clinic == undefined || 
 				                	   d.properties.suspected == undefined){
@@ -196,11 +213,6 @@ export default class Map extends React.Component{
 				                	}else{
 				                		return DELIVERABLE_COLOR;
 				                	}
-
-				                	// if(d.properties.confirmed_lab == null){
-				                	// 	console.log('null')
-				                	// }
-				                	// return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
 				                },
 				                options : [],
 				                notes : []

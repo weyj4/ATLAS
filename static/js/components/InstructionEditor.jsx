@@ -182,11 +182,11 @@ export default class InstructionEditor extends React.Component{
 			Coordinates : `(${this.state.marker.coordinates.lat.toFixed(4)}, ${this.state.marker.coordinates.lng.toFixed(4)})`,
 			Department : props.department,
 			Municipality : props.municipality,
-			Population : props.pop ? props.pop.toLocaleString() : 'Missing Population Info',
+			Population : props.pop != null ? props.pop.toLocaleString() : 'Missing Population Info',
 			Date : props.date,
-			'Clinic Confirmed Cases' : props.confirmed_clinic ? props.confirmed_clinic : 'Missing Clinic Cases',
-			'Lab Confirmed Cases' : props.confirmed_lab ? props.confirmed_lab : 'Missing Lab Cases',
-			'Suspected Cases' : props.suspected ? props.suspected : 'Missing Suspected Cases',
+			'Clinic Confirmed Cases' : props.confirmed_clinic != null ? props.confirmed_clinic : 'Missing Clinic Cases',
+			'Lab Confirmed Cases' : props.confirmed_lab != null ? props.confirmed_lab : 'Missing Lab Cases',
+			'Suspected Cases' : props.suspected != null ? props.suspected : 'Missing Suspected Cases',
 		}
 
 		return(
