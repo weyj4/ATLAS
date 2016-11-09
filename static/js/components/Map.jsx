@@ -185,7 +185,9 @@ export default class Map extends React.Component{
 				                value : 'columbia_zika',
 				                fill : (d) => {
 
-				                	if(!d.properties.confirmed_lab || !d.properties.confirmed_clinic || !d.properties.suspected){
+				                	if(d.properties.confirmed_lab == undefined || 
+				                	   d.properties.confirmed_clinic == undefined || 
+				                	   d.properties.suspected == undefined){
 				                		//missing health data
 				                		if(!d.properties.pop){
 				                			return INVISIBLE_COLOR;
