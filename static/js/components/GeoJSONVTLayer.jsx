@@ -37,7 +37,6 @@ export default class GeoJSONVTLayer extends MapComponent {
 
     var tile = this.tileIndex.getTile(params.tilePoint.z, params.tilePoint.x, params.tilePoint.y)
     if (!tile) {
-      console.log('empty tile')
       return
     }
 
@@ -45,7 +44,7 @@ export default class GeoJSONVTLayer extends MapComponent {
 
     var features = tile.features
 
-    ctx.strokeStyle = 'black'
+    ctx.strokeStyle = 'white'
     ctx.lineWidth = 0.5; // Math.pow(params.tilePoint.z / 18, 5)
 
     for (var i = 0; i < features.length; i++) {
@@ -96,7 +95,6 @@ export default class GeoJSONVTLayer extends MapComponent {
   }
 
   componentDidMount () {
-    console.log('adding features')
     this.addFeatures()
 
     var map = this.context.map
@@ -118,7 +116,6 @@ export default class GeoJSONVTLayer extends MapComponent {
   }
 
   render () {
-    console.log('rendering geojsonvt')
     return null
   }
 }

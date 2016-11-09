@@ -14,6 +14,7 @@ import ZikaStore from 'atlas/stores/ZikaStore';
 import MapStore from 'atlas/stores/MapStore';
 import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions';
 import GeoJSONVTLayer from 'atlas/components/GeoJSONVTLayer';
+import * as MessageActions from 'atlas/actions/MessageActions';
 
 import {
 	INVISIBLE_COLOR,
@@ -54,11 +55,29 @@ export default class Map extends React.Component{
 		this.addMarkers();
 	}
 
+	loadingMsg = (tick) => {
+		var dots = tick % 4;
+		return(
+			<div style={{
+				position : 'absolute',
+				top : '50%',
+				left : '50%',
+				transform : 'translateX(-50%) translateY(-50%)',
+			}}>
+				<p style={{fontSize : 30, color : 'white'}}>
+					Loading{'.'.repeat(dots)}
+				</p>
+			</div>
+		)
+	}
+
 	updateDate = () => {
 		var date = ZikaStore.getDate();
 		console.log(`${BACKEND_URL}/zika_layer_all&date=${date}`)
+		MessageActions.setLoadingMsg(this.loadingMsg)
 		$.get(`${BACKEND_URL}/zika_layer_all?date=${date}`).done(result => {
 			MapStore.addFeaturesToRTree(result);
+			MessageActions.clearLoadingMsg()
 			this.setState(_.extend({}, this.state, {features : result}));
     }).fail(err => {
       console.log(err)
@@ -178,10 +197,6 @@ export default class Map extends React.Component{
 	}
 
 	render(){
-		// var pallete = d3.scale.linear()
-		// 	.domain([0, 63]).interpolate(d3.interpolateRgb)
-		// 	.range(['blue', 'red'])
-
 		return(
 			<div {...this.props}>
 				<Leaflet.Map 
