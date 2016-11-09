@@ -30,6 +30,18 @@ export default class GeoJSONVTLayer extends MapComponent {
       if (result) {
         this.tooltip.classed('hidden', false)
         this.tooltipPolygonInfo.html(this.props.tooltip(result))
+
+        if (this.currentFeature) {
+          map.removeLayer(this.currentFeature)
+        }
+
+        this.currentFeature = L.geoJson(result, {
+          style: function (feature) {
+            return {color: 'black'}
+          }
+        })
+
+        this.currentFeature.addTo(map)
       }else {
         this.tooltip.classed('hidden', true)
       }
