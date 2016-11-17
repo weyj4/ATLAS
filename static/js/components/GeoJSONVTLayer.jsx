@@ -99,14 +99,14 @@ export default class GeoJSONVTLayer extends MapComponent {
 
     var map = this.context.map
 
-    var tileLayer = L.canvasTiles()
+    this.tileLayer = L.canvasTiles()
       .params({ debug: false, padding: 5 })
       .drawing(this.drawingOnCanvas)
 
-    tileLayer.addTo(map)
+    this.tileLayer.addTo(map)
   }
 
-  componentDidMount () {
+  addLayer = () => {
     this.addFeatures()
 
     var map = this.context.map
@@ -125,6 +125,36 @@ export default class GeoJSONVTLayer extends MapComponent {
       this.tooltipCoordinates.html(`<br/>Coordinates: (${d.latlng.lat.toFixed(4)}, ${d.latlng.lng.toFixed(4)})`)
     })
     map.on('mouseout', (d) => this.tooltip.classed('hidden', true))
+  }
+
+  componentDidMount () {
+    this.addLayer()
+  }
+
+  clear = () => {
+    const svg = d3.select(this.context.map._container).select('svg')
+    svg.selectAll('*').remove()
+    this.context.map.removeLayer(this.polyLayer)
+  }
+
+  componentWillUnmount (nextProps) {
+    this.tooltip.classed('hidden', true)
+    this.clear()
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.endpoint !== this.props.endpoint) {
+      this.props = nextProps
+      MapStore.clearRTree()
+      var tileOptions = {
+        maxZoom: 18,
+        tolerance: 1,
+        buffer: 64,
+        debug: 0
+      }
+      this.tileIndex = geojsonvt({type: 'FeatureCollection', features: this.props.features.features}, tileOptions)
+      this.tileLayer.redraw()
+    }
   }
 
   render () {

@@ -4,6 +4,9 @@ import * as MapActions from 'atlas/actions/MapActions'
 import MapStore from 'atlas/stores/MapStore'
 import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions'
 import turf from 'turf'
+import * as ZikaActions from 'atlas/actions/ZikaActions'
+import { SafeAnchor } from 'react-bootstrap'
+import ZikaStore from 'atlas/stores/ZikaStore'
 
 export default class Legend extends React.Component {
 
@@ -14,7 +17,9 @@ export default class Legend extends React.Component {
         {label: 'Invsible', color: 'rgb(155,126,112)'},
         {label: 'Identifiable', color: 'rgb(101,167,217)'},
         {label: 'Deliverable', color: 'rgb(162,195,95)'}
-      ]
+      ],
+      play: false,
+      dateIndex: ZikaStore.getDateIndex()
     }
   }
 
@@ -39,6 +44,37 @@ export default class Legend extends React.Component {
     })
   }
 
+  updateDate = () => {
+    this.setState(_.extend({}, this.state, {
+      dateIndex: ZikaStore.getDateIndex()
+    }))
+  }
+
+  componentWillMount () {
+    ZikaStore.on('change-date-index', this.updateDate)
+  }
+
+  componentWillUnmount () {
+    ZikaStore.removeListener('change-date-index', this.updateDate)
+  }
+
+  incDateIndex = () => {
+    console.log('incrementing date index')
+    ZikaStore.changeDateIndex(this.state.dateIndex + 1)
+  }
+
+  togglePlay = () => {
+    this.setState(_.extend({}, this.state, {
+      play: !this.state.play
+    }))
+    if (!this.playTimer) {
+      this.playTimer = setInterval(this.incDateIndex, 500)
+    }else {
+      clearTimeout(this.playTimer)
+      this.playTimer = null
+    }
+  }
+
   render () {
     return (
       <div style={_.extend(this.props.style, {
@@ -60,6 +96,11 @@ export default class Legend extends React.Component {
         <div style={styles.data}>
           DATA
         </div>
+        <div style={styles.playButton}>
+          <SafeAnchor onClick={this.togglePlay} style={{textDecoration: 'none', color: 'black'}}>
+            <span style={{fontSize: 40}} class={this.state.play ? 'glyphicon glyphicon-pause' : 'glyphicon glyphicon-play'} aria-hidden='true'></span>
+          </SafeAnchor>
+        </div>
         <div style={styles.addPinContainer}>
           <div style={styles.pinContainer}>
             <img
@@ -79,6 +120,15 @@ export default class Legend extends React.Component {
 }
 
 const styles = {
+  playButton: {
+    position: 'absolute',
+    left: '72%',
+    top: '25%',
+    // height : '77.71%',
+    height: '95%',
+    width: '11%'
+
+  },
   classificationRow: {
     marginLeft: '6%',
     position: 'absolute',

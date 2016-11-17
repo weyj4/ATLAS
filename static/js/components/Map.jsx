@@ -74,10 +74,11 @@ export default class Map extends React.Component{
 	updateDate = () => {
 		var date = ZikaStore.getDate();
 		console.log(`${BACKEND_URL}/zika_layer_all&date=${date}`)
-		MessageActions.setLoadingMsg(this.loadingMsg)
+		//MessageActions.setLoadingMsg(this.loadingMsg)
 		$.get(`${BACKEND_URL}/zika_layer_all?date=${date}`).done(result => {
+			console.log(result.features[10])
 			MapStore.addFeaturesToRTree(result);
-			MessageActions.clearLoadingMsg()
+			//MessageActions.clearLoadingMsg()
 			this.setState(_.extend({}, this.state, {features : result}));
 	    }).fail(err => {
 	      console.log(err)
@@ -200,6 +201,9 @@ export default class Map extends React.Component{
 	}
 
 	render(){
+		var pallete = d3.scale.linear()
+			.domain([0, 63]).interpolate(d3.interpolateRgb)
+			.range(['blue', 'red'])
 		return(
 			<div {...this.props}>
 				<Leaflet.Map 
@@ -220,6 +224,13 @@ export default class Map extends React.Component{
 								label : 'Columbian Zika',
 				                value : 'columbia_zika',
 				                fill : (d) => {
+				                	/*
+				                	if(d.properties.confirmed_lab == null){
+				                		console.log('null')
+				                	}
+				                	return pallete(d.properties.confirmed_lab + d.properties.confirmed_clinic)
+*/
+				                	
 				                	if(d.properties.confirmed_lab == undefined || 
 				                	   d.properties.confirmed_clinic == undefined || 
 				                	   d.properties.suspected == undefined){
