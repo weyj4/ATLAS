@@ -97,10 +97,17 @@ app.get('/fine_pop/:z/:x/:y.geojson', (req, res) => {
     return
   }
 
+  /*
   var q = `
     SELECT ST_X(geom) as lon, ST_Y(geom) as lat, pop FROM pop_density WHERE
       ST_Contains(${tile.bbox_4326}, geom) AND country='Guatemala'
+  `*/
+
+  var q = `
+    SELECT ST_X(point) as lon, ST_Y(point) as lat, val as pop FROM pop_density_polygons WHERE
+      ST_Contains(${tile.bbox_4326}, point)
   `
+
   console.log(q)
   db.query(q, (err, result) => {
     if (err) {

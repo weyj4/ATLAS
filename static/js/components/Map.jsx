@@ -122,7 +122,8 @@ export default class Map extends React.Component {
       layer: LayerStore.getLayer(),
       zoom: 15,
       zikaDate: ZikaStore.getDate(),
-      markers: []
+      markers: [],
+      showPopulation: true
     }
     if (this.state.zikaDate) {
       // this.updateDate()
@@ -193,12 +194,16 @@ export default class Map extends React.Component {
     })
   }
 
+  togglePop = () => {
+    this.setState(_.extend({}, this.state, {showPopulation: !this.state.showPopulation}))
+  }
+
   render () {
-    var pallete = d3.scale.linear()
-      .domain([0, 63]).interpolate(d3.interpolateRgb)
-      .range(['blue', 'red'])
     return (
       <div {...this.props}>
+        {/*<Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 20}}>
+                          {this.state.showPopulation ? 'Hide ' : 'Show '} Population
+                        </Button>*/}
         <Leaflet.Map
           ref='map'
           id='map'
@@ -209,29 +214,7 @@ export default class Map extends React.Component {
           scrollWheelZoom={false}
           onDragEnd={this.moveEnd}>
           <CHW/>
-          {/*
-                    			true || this.state.showLayer && this.state.zikaDate && this.state.features ?
-                    				<VectorLayer
-                    					id={'__id__1'}
-                    					features={this.state.features}
-                    					layer={{
-                    						label : 'Guatemala',
-                    		                value : 'guatemala',
-                    		                fill : (d) => {
-                    		                	return 'white'
-                    		                },
-                    		                options : [],
-                    		                notes : []
-                    		            }}
-                    					endpoint={`pop_layer/{z}/{x}/{y}.geojson`}
-                    					tooltip={(d) => {
-                    						return [
-                    							d.properties.name0,
-                    							d.properties.name1,
-                    							d.properties.name2
-                    						].join('<br/>')
-                                                        							}} /> : null */}
-          {<Heatmap endpoint='fine_pop/{z}/{x}/{y}.geojson' />}
+          {this.state.showPopulation ? <Heatmap endpoint='fine_pop/{z}/{x}/{y}.geojson' /> : null}
           <Leaflet.TileLayer url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' attribution='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
           />
         </Leaflet.Map>

@@ -4,12 +4,8 @@ import polylabel from 'polylabel'
 var L = require('leaflet')
 import MapStore from 'atlas/stores/MapStore'
 import HeatmapLayer from 'react-leaflet-heatmap-layer'
-
+import { BACKEND_URL } from 'atlas/Constants'
 // var HeatMapOverlay = require('atlas/L.Heatmap.js')
-
-const BACKEND_URL = process.env.NODE_ENV === 'production' ?
-  'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
-  'http://localhost:8080'
 
 export default class VectorLayer extends MapComponent {
   static contextTypes = {
@@ -25,9 +21,12 @@ export default class VectorLayer extends MapComponent {
 
   componentDidMount () {
     var component = this
+
+    component.refs.heatmap._heatmap.max(90)
+
     this.polygons = {}
     MapStore.clearRTree()
-    L.TileLayer.d3_topoJSON = L.TileLayer.extend({
+    L.TileLayer.HeatmapTileLayer = L.TileLayer.extend({
       onAdd: function (map) {
         L.TileLayer.prototype.onAdd.call(this, map)
         this.map = map
@@ -58,7 +57,7 @@ export default class VectorLayer extends MapComponent {
             } else if (!component.unmounted) {
               tile.xhr = null
 
-              // console.log(`Currently have ${component.state.data.length} elements`)
+              console.log(`Currently have ${component.state.data.length} elements`)
 
               if (component.stale) {
                 component.setState(_.extend({}, component.state, {data: geoJson}))
@@ -91,7 +90,7 @@ export default class VectorLayer extends MapComponent {
     })
     var map = this.context.map
     map._initPathRoot()
-    this.polyLayer = new L.TileLayer.d3_topoJSON(`${BACKEND_URL}/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
+    this.heatmapLayer = new L.TileLayer.HeatmapTileLayer(`${BACKEND_URL}/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
   // this.heatLayer = new HeatMapOverlay({
   //   latField: 'lat',
   //   lngField: 'lon',
@@ -101,7 +100,7 @@ export default class VectorLayer extends MapComponent {
   }
 
   componentWillUnmount (nextProps) {
-    this.context.map.removeLayer(this.polyLayer)
+    this.context.map.removeLayer(this.heatmapLayer)
   }
 
   render () {
@@ -110,8 +109,9 @@ export default class VectorLayer extends MapComponent {
       <HeatmapLayer
         ref='heatmap'
         {...this.props}
-        max={1.0}
-        radius={1000}
+        max={1000}
+        blur={1}
+        radius={0.1}
         points={this.state.data}
         longitudeExtractor={p => p.lon}
         latitudeExtractor={p => p.lat}

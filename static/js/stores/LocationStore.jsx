@@ -9,6 +9,7 @@ class LocationStore extends EventEmitter {
     // this.location = {lat: 14.533574, lng: -90.592490}
     // this.location = {lat: 17.229645, lng: -90.806238}
     this.location = {lat: 14.84363107866439, lng: -91.52491092681885}
+    // this.location = {lat: 14.627507, lng: -90.513856}
     this.bounds = undefined
     this.locations = []
     this.locationsBB = undefined
