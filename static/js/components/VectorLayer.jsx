@@ -15,14 +15,14 @@ export default class VectorLayer extends MapComponent {
 
   filterPolygons (geoJson) {
     var j = 0
-    for (var i = 0; i < geoJson.features.length; i++) {
-      if (!this.polygons[geoJson.features[i].gid]) {
-        this.polygons[geoJson.features[i].gid] = true
-        geoJson.features[j] = geoJson.features[i]
+    for (var i = 0; i < geoJson.length; i++) {
+      if (!this.polygons[geoJson[i].properties.gid]) {
+        this.polygons[geoJson[i].properties.gid] = true
+        geoJson[j] = geoJson[i]
         j++
       }
     }
-    geoJson.features.length = j
+    geoJson.length = j
   }
 
   constructor (props) {
@@ -69,15 +69,15 @@ export default class VectorLayer extends MapComponent {
 
               component.filterPolygons(geoJson)
               var paths = tile.nodes.selectAll('path')
-                .data(geoJson.features).enter()
+                .data(geoJson).enter()
                 .append('path')
                 .attr('class', component.props.id)
                 .attr('d', self._path)
-                //		                        .style('fill-opacity', 0.7)
+                //                            .style('fill-opacity', 0.7)
                 .style('stroke-width', `${strokeWidth}px`)
                 .style('stroke', '#000000')
                 .style('fill', (d) => {
-                  component.polygons[d.gid] = true
+                  component.polygons[d.properties.gid] = true
                   return component.props.layer.fill(d)
                 })
               if (component.props.tooltip) {

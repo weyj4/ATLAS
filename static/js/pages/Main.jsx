@@ -43,7 +43,7 @@ export default class Main extends React.Component {
     return (
       <div style={styles.container}>
         <Map style={styles.map} />
-        <Legend style={styles.legend} />
+        {/*<Legend style={styles.legend} />*/}
         {this.state.loadingMsg ?
            <LoadingMessage style={styles.loadingMsg} message={this.state.loadingMsg} />
            : null}
