@@ -1,7 +1,7 @@
 import React from 'react'
 import * as Leaflet from 'react-leaflet'
 import topojson from 'topojson'
-import { Button } from 'react-bootstrap'
+import { Button, SafeAnchor } from 'react-bootstrap'
 import polylabel from 'polylabel'
 import LayerStore from 'atlas/stores/LayerStore'
 import VectorLayer from 'atlas/components/VectorLayer'
@@ -123,8 +123,22 @@ export default class Map extends React.Component {
       zoom: 15,
       zikaDate: ZikaStore.getDate(),
       markers: [],
-      showPopulation: true
+      showPopulation: true,
+      basemap: 'Satellite'
     }
+
+    this.layers = {
+      'Street Map': {
+        url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      },
+      Satellite: {
+        url: 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attribution: '&copy; <a href="http://www.esri.com/">Esri</a> contributors'
+      }
+
+    }
+
     if (this.state.zikaDate) {
       // this.updateDate()
     }
@@ -198,12 +212,21 @@ export default class Map extends React.Component {
     this.setState(_.extend({}, this.state, {showPopulation: !this.state.showPopulation}))
   }
 
+  toggleBasemap = () => {
+    this.setState(_.extend({}, this.state, {
+      basemap: this.state.basemap === 'Satellite' ? 'Street Map' : 'Satellite'
+    }))
+  }
+
   render () {
     return (
       <div {...this.props}>
+        <SafeAnchor style={styles.baseLayerButton} onClick={this.toggleBasemap}>
+          {this.state.basemap === 'Satellite' ? 'Street Map' : 'Satellite'}
+        </SafeAnchor>
         {/*<Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 20}}>
-                          {this.state.showPopulation ? 'Hide ' : 'Show '} Population
-                        </Button>*/}
+                                                                                                                                                                                                                                                                                                                                                                                                                          {this.state.showPopulation ? 'Hide ' : 'Show '} Population
+                                                                                                                                                                                                                                                                                                                                                                                                                        </Button>*/}
         <Leaflet.Map
           ref='map'
           id='map'
@@ -215,10 +238,27 @@ export default class Map extends React.Component {
           onDragEnd={this.moveEnd}>
           <CHW/>
           {this.state.showPopulation ? <Heatmap endpoint='fine_pop/{z}/{x}/{y}.geojson' /> : null}
-          <Leaflet.TileLayer url='http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' attribution='&copy; <a href="http://www.esri.com/">Esri</a> contributors'
-          />
+          <Leaflet.TileLayer url={this.layers[this.state.basemap].url} attribution={this.layers[this.state.basemap].attribution} />
         </Leaflet.Map>
       </div>
     )
+  }
+}
+
+const styles = {
+  baseLayerButton: {
+    zIndex: 5,
+    position: 'absolute',
+    textDecoration: 'none',
+    color: 'black',
+    top: 10,
+    left: 50,
+    backgroundColor: 'rgb(255,255,255)',
+    borderRadius: 4,
+    width: 75,
+    height: 25,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 }
