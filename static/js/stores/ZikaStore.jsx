@@ -1,9 +1,6 @@
 import { EventEmitter } from 'events'
 import dispatcher from '../Dispatcher'
-
-const BACKEND_URL = process.env.NODE_ENV === 'production' ?
-  'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
-  'http://localhost:8080'
+import {BACKEND_URL} from '../Constants'
 
 class ZikaStore extends EventEmitter {
   constructor () {

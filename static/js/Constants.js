@@ -1,5 +1,5 @@
 export const BACKEND_URL = process.env.NODE_ENV === 'production' ?
-  'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
+  'http://ec2-54-218-83-41.us-west-2.compute.amazonaws.com' :
   'http://localhost:8080'
 
 export const INVISIBLE_COLOR = 'rgb(155,126,112)'

@@ -96,11 +96,12 @@ export default class Legend extends React.Component {
         <div style={styles.data}>
           DATA
         </div>
+        {/*
         <div style={styles.playButton}>
           <SafeAnchor onClick={this.togglePlay} style={{textDecoration: 'none', color: 'black'}}>
             <span style={{fontSize: 40}} class={this.state.play ? 'glyphicon glyphicon-pause' : 'glyphicon glyphicon-play'} aria-hidden='true'></span>
           </SafeAnchor>
-        </div>
+        </div>*/}
         <div style={styles.addPinContainer}>
           <div style={styles.pinContainer}>
             <img
