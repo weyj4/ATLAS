@@ -12,10 +12,11 @@ var topojson = require('topojson')
 var textbelt = require('textbelt')
 var topojson = require('topojson')
 var MBTiles = require('mbtiles')
+var webpack = require('webpack')
+var webpackConfig = require('../webpack.config')
+var compiler = webpack(webpackConfig)
 
-// var spawn = require('child_process').spawn
 var exec = require('child_process').exec
-// import {spawn, exec} from 'child_process'
 
 var config = _.extend({database: 'atlas'}, process.env.AWS_IP ? {
   user: process.env.DB_USER,
@@ -31,7 +32,18 @@ var db = new pg.Client(config)
 db.connect()
 
 var app = express()
-app.use(cors())
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use(require('webpack-dev-middleware')(compiler, {
+    noInfo: true, publicPath: webpackConfig.output.publicPath
+  }))
+
+  app.use(require('webpack-hot-middleware')(compiler, {
+    log: console.log,
+    path: '/__webpack_hmr',
+    heartbeat: 10 * 1000
+  }))
+}
 
 // Serve static files from the Node.js server for now...
 app.use(express.static(__dirname + '/../static/'))
@@ -51,24 +63,25 @@ ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
   return tile
 }
 
-/*
-new MBTiles(path.join(__dirname, 'pop.mbtiles'), (err, mbtiles) => {
+new MBTiles(path.join(__dirname, 'mbtiles/guatemala-pop.mbtiles'), (err, mbtiles) => {
   if (err) {
     throw err
   }else {
     app.get('/pop_mb/:z/:x/:y.png', (req, res) => {
+      console.log(`${req.params.z}/${req.params.x}/${req.params.y}`)
       mbtiles.getTile(req.params.z, req.params.x, req.params.y, function (err, tile, headers) {
         if (err) {
           console.log(err)
           res.status(404).send('Tile rendering error: ' + err + '\n')
         } else {
           res.header('Content-Type', 'image/png')
+          debugger
           res.send(tile)
         }
       })
     })
   }
-})*/
+})
 
 app.get('/CHW', (req, res) => {
   db.query('SELECT reported, hh_id, diag_cough, diag_fever, chw_id, visit_id, hh_lat as lat, hh_lon as lon FROM mock_data', (err, result) => {
