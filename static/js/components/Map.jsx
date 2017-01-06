@@ -10,10 +10,7 @@ import d3 from 'd3';
 import _ from 'underscore';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
-
-const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
-				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
-				'http://localhost:8080'
+import {BACKEND_URL} from '../Constants'
 
 const DG_API_KEY='pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
 

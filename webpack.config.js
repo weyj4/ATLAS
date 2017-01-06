@@ -51,10 +51,18 @@ module.exports = {
     [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env' : {
+        BACKEND_URL : JSON.stringify('http://localhost:8080')
+      }
+    })
     ] : [
     new webpack.DefinePlugin({
-      'process.env' : {'NODE_ENV' : JSON.stringify('production')}
+      'process.env' : {
+        'NODE_ENV' : JSON.stringify('production'),
+        'BACKEND_URL' : JSON.stringify('http://' + process.env.MY_IP)
+      },
     }),
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.OccurenceOrderPlugin(),

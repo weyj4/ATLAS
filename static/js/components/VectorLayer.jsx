@@ -2,10 +2,7 @@ import React, {PropTypes} from 'react';
 import {MapComponent} from 'react-leaflet';
 import polylabel from 'polylabel';
 var L = require('leaflet');
-
-const BACKEND_URL = process.env.NODE_ENV === 'production' ? 
-				'http://ec2-54-149-176-177.us-west-2.compute.amazonaws.com' :
-				'http://localhost:8080'
+import {BACKEND_URL} from '../Constants'
 
 export default class VectorLayer extends MapComponent{
 	static contextTypes = {
