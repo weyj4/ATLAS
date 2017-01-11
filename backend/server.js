@@ -1,28 +1,22 @@
+require('dotenv').config({silent: true})
 var express = require('express')
 var path = require('path')
-require('dotenv').config({silent: true})
 var pg = require('pg')
-var request = require('request')
-var cors = require('cors')
-var util = require('util')
 var SphericalMercator = require('sphericalmercator')
-var _ = require('underscore')
-var turf = require('turf')
-var topojson = require('topojson')
+var _ = require('lodash')
 var textbelt = require('textbelt')
-var topojson = require('topojson')
 var MBTiles = require('mbtiles')
 var webpack = require('webpack')
 var webpackConfig = require('../webpack.config')
 var compiler = webpack(webpackConfig)
+var tilelive = require('tilelive')
+require('tilelive-mapnik').registerProtocols(tilelive)
 
 var exec = require('child_process').exec
 
-var config = _.extend({database: 'atlas'}, process.env.AWS_IP ? {
+var config = _.extend({database: 'atlas'}, process.env.DB_USER ? {
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.AWS_IP,
-  port: +process.env.DB_PORT
+  password: process.env.DB_PASSWORD
 } : {})
 
 var port = process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 8080
@@ -63,25 +57,42 @@ ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
   return tile
 }
 
-new MBTiles(path.join(__dirname, 'mbtiles/guatemala-pop.mbtiles'), (err, mbtiles) => {
-  if (err) {
-    throw err
-  }else {
+// new MBTiles(path.join(__dirname, 'mbtiles/guatemala-pop.mbtiles'), (err, mbtiles) => {
+//   if (err) {
+//     throw err
+//   }else {
+//     app.get('/pop_mb/:z/:x/:y.png', (req, res) => {
+//       console.log(`${req.params.z}/${req.params.x}/${req.params.y}`)
+//       mbtiles.getTile(req.params.z, req.params.x, req.params.y, function (err, tile, headers) {
+//         if (err) {
+//           console.log(err)
+//           res.status(404).send('Tile rendering error: ' + err + '\n')
+//         } else {
+//           res.header('Content-Type', 'image/png')
+//           debugger
+//           res.send(tile)
+//         }
+//       })
+//     })
+//   }
+// })
+
+tilelive.load(`mapnik://${__dirname}/Heatmap.xml`, (err, source) => {
+  if(err){
+    throw(err);
+  }else{
     app.get('/pop_mb/:z/:x/:y.png', (req, res) => {
-      console.log(`${req.params.z}/${req.params.x}/${req.params.y}`)
-      mbtiles.getTile(req.params.z, req.params.x, req.params.y, function (err, tile, headers) {
-        if (err) {
-          console.log(err)
-          res.status(404).send('Tile rendering error: ' + err + '\n')
-        } else {
-          res.header('Content-Type', 'image/png')
-          debugger
+      source.getTile(req.params.z, req.params.x, req.params.y, (err, tile, headers) => {
+        if(err){
+          res.status(500).send(err)
+        }else{
           res.send(tile)
         }
       })
     })
   }
 })
+
 
 app.get('/CHW', (req, res) => {
   db.query('SELECT reported, hh_id, diag_cough, diag_fever, chw_id, visit_id, hh_lat as lat, hh_lon as lon FROM mock_data', (err, result) => {

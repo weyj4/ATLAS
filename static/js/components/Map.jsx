@@ -1,6 +1,5 @@
 import React from 'react'
 import * as Leaflet from 'react-leaflet'
-import topojson from 'topojson'
 import { Button, SafeAnchor } from 'react-bootstrap'
 import polylabel from 'polylabel'
 import LayerStore from 'atlas/stores/LayerStore'
@@ -13,7 +12,6 @@ import d3 from 'd3'
 import ZikaStore from 'atlas/stores/ZikaStore'
 import MapStore from 'atlas/stores/MapStore'
 import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions'
-import GeoJSONVTLayer from 'atlas/components/GeoJSONVTLayer'
 import * as MessageActions from 'atlas/actions/MessageActions'
 import Heatmap from 'atlas/components/HeatMap'
 import CHW from 'atlas/components/CHW'
@@ -123,7 +121,7 @@ export default class Map extends React.Component {
       zoom: 15,
       zikaDate: ZikaStore.getDate(),
       markers: [],
-      showPopulation: true,
+      showPopulation: false,//true,
       basemap: 'Satellite'
     }
 
@@ -239,6 +237,10 @@ export default class Map extends React.Component {
           <CHW/>
           {this.state.showPopulation ? <Heatmap endpoint='fine_pop/{z}/{x}/{y}.geojson' /> : null}
           <Leaflet.TileLayer url={this.layers[this.state.basemap].url} attribution={this.layers[this.state.basemap].attribution} />
+          <Leaflet.TileLayer
+            url={`${BACKEND_URL}/pop_mb/{z}/{x}/{y}.png`}
+            opacity={0.5}
+          />
         </Leaflet.Map>
       </div>
     )
