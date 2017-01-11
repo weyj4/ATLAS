@@ -1,0 +1,11 @@
+#shapefiles
+*.dbf
+*.prj
+*.shp
+*.shp.xml
+*.shx
+*.zip
+.env
+npm-debug*
+.DS_Store
+test/coverage
