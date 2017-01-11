@@ -4,15 +4,11 @@ var path = require('path')
 var pg = require('pg')
 var SphericalMercator = require('sphericalmercator')
 var _ = require('lodash')
-var textbelt = require('textbelt')
-var MBTiles = require('mbtiles')
 var webpack = require('webpack')
 var webpackConfig = require('../webpack.config')
 var compiler = webpack(webpackConfig)
 var tilelive = require('tilelive')
 require('tilelive-mapnik').registerProtocols(tilelive)
-
-var exec = require('child_process').exec
 
 var config = _.extend({database: 'atlas'}, process.env.DB_USER ? {
   user: process.env.DB_USER,
@@ -57,26 +53,6 @@ ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
   return tile
 }
 
-// new MBTiles(path.join(__dirname, 'mbtiles/guatemala-pop.mbtiles'), (err, mbtiles) => {
-//   if (err) {
-//     throw err
-//   }else {
-//     app.get('/pop_mb/:z/:x/:y.png', (req, res) => {
-//       console.log(`${req.params.z}/${req.params.x}/${req.params.y}`)
-//       mbtiles.getTile(req.params.z, req.params.x, req.params.y, function (err, tile, headers) {
-//         if (err) {
-//           console.log(err)
-//           res.status(404).send('Tile rendering error: ' + err + '\n')
-//         } else {
-//           res.header('Content-Type', 'image/png')
-//           debugger
-//           res.send(tile)
-//         }
-//       })
-//     })
-//   }
-// })
-
 tilelive.load(`mapnik://${__dirname}/Heatmap.xml`, (err, source) => {
   if(err){
     throw(err);
@@ -108,94 +84,6 @@ app.get('/CHW', (req, res) => {
         }
       }
       res.json(chws)
-    }
-  })
-})
-
-app.get('/fine_pop/:z/:x/:y.geojson', (req, res) => {
-  var tile = getBBox(req.params.x, req.params.y, req.params.z)
-
-  console.log(req.params.z)
-  if (req.params.z < 13) {
-    res.json([])
-    return
-  }
-
-  /*
-  var q = `
-    SELECT ST_X(geom) as lon, ST_Y(geom) as lat, pop FROM pop_density WHERE
-      ST_Contains(${tile.bbox_4326}, geom) AND country='Guatemala'
-  `*/
-
-  var q = `
-    SELECT ST_X(point) as lon, ST_Y(point) as lat, val as pop FROM pop_density_polygons WHERE
-      ST_Contains(${tile.bbox_4326}, point)
-  `
-
-  console.log(q)
-  db.query(q, (err, result) => {
-    if (err) {
-      console.log(err)
-      res.status(500).send(err)
-    }else {
-      res.json(result.rows)
-    }
-  })
-})
-
-app.get('/pop_layer/:z/:x/:y.geojson', (req, res) => {
-  var tile = getBBox(req.params.x, req.params.y, req.params.z)
-
-  var q = `SELECT 'Feature' as type, 
-              ST_AsGeoJSON(shapes.geom)::json as geometry,
-              json_build_object(  
-                  'name0', shapes.name0,
-                  'name1', shapes.name1,
-                  'name2', shapes.name2,
-                  'gid', gid
-              ) as properties FROM shapes 
-                WHERE ST_Intersects(geom, ${tile.bbox_4326}) AND
-                      shapes.level=2;`
-  console.log(q)
-  db.query(q, (err, result) => {
-    if (err) {
-      console.log(err)
-      res.status(500).send(err)
-    }else {
-      res.json(result.rows)
-    }
-  })
-})
-
-app.get('/GetZikaDates', function (req, res) {
-  db.query('SELECT DISTINCT report_date FROM zika ORDER BY report_date;').then((data) => {
-    res.json(data.rows.map((x) => new Date(x.report_date).toDateString()))
-  }).catch((err) => {
-    console.log(err)
-  })
-})
-
-app.get('/Email', function (req, res) {
-  var address = req.query.address
-  var text = req.query.text
-  console.log(`echo "${text}" | mutt -s "Message from ATLAS" ${address}`)
-  exec(`echo "${text}" | mutt -s "Message from ATLAS" ${address}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`)
-      return
-    }
-    console.log(`stdout: ${stdout}`)
-    console.log(`stderr: ${stderr}`)
-  })
-})
-
-app.get('/Text', function (req, res) {
-  var number = req.query.number
-  var text = req.query.text
-  console.log(`Sending ${number}: ${text}`)
-  textbelt.sendText(number, text, function (err) {
-    if (err) {
-      console.log(err)
     }
   })
 })

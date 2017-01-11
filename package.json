@@ -52,8 +52,7 @@
     "turf": "^3.0.14",
     "url-loader": "^0.5.7",
     "util": "^0.10.3",
-    "webpack": "^1.13.1",
-    "ws": "^1.1.1"
+    "webpack": "^1.13.1"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",
