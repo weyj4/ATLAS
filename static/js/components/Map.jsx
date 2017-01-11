@@ -91,8 +91,8 @@ export default class Map extends React.Component {
       layer: LayerStore.getLayer(),
       zoom: 15,
       markers: [],
-      showPopulation: false,//true,
-      basemap: 'Satellite'
+      showPopulation: true,
+      basemap: 'Street Map'
     }
 
     this.layers = {
@@ -183,9 +183,9 @@ export default class Map extends React.Component {
         <SafeAnchor style={styles.baseLayerButton} onClick={this.toggleBasemap}>
           {this.state.basemap === 'Satellite' ? 'Street Map' : 'Satellite'}
         </SafeAnchor>
-        {/*<Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 20}}>
-                                                                                                                                                                                                                                                                                                                                                                                                                          {this.state.showPopulation ? 'Hide ' : 'Show '} Population
-                                                                                                                                                                                                                                                                                                                                                                                                                        </Button>*/}
+        <Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 20}}>
+          {this.state.showPopulation ? 'Hide ' : 'Show '} Population
+        </Button>
         <Leaflet.Map
           ref='map'
           id='map'
@@ -196,12 +196,13 @@ export default class Map extends React.Component {
           scrollWheelZoom={false}
           onDragEnd={this.moveEnd}>
           <CHW/>
-          {this.state.showPopulation ? <Heatmap endpoint='fine_pop/{z}/{x}/{y}.geojson' /> : null}
           <Leaflet.TileLayer url={this.layers[this.state.basemap].url} attribution={this.layers[this.state.basemap].attribution} />
-          <Leaflet.TileLayer
-            url={`${BACKEND_URL}/pop_mb/{z}/{x}/{y}.png`}
-            opacity={0.5}
-          />
+          {this.state.showPopulation ? 
+            <Leaflet.TileLayer
+              url={`${BACKEND_URL}/pop_mb/{z}/{x}/{y}.png`}
+              opacity={0.5}
+            /> : null
+          }
         </Leaflet.Map>
       </div>
     )
