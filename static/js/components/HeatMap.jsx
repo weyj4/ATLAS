@@ -1,11 +1,9 @@
 import React, { PropTypes } from 'react'
 import { MapComponent } from 'react-leaflet'
-import polylabel from 'polylabel'
 var L = require('leaflet')
 import MapStore from 'atlas/stores/MapStore'
 import HeatmapLayer from 'react-leaflet-heatmap-layer'
 import { BACKEND_URL } from 'atlas/Constants'
-// var HeatMapOverlay = require('atlas/L.Heatmap.js')
 
 export default class VectorLayer extends MapComponent {
   static contextTypes = {
@@ -66,23 +64,6 @@ export default class VectorLayer extends MapComponent {
                 Array.prototype.push.apply(component.state.data, geoJson)
                 component.setState(_.extend({}, component.state))
               }
-              /*
-              if (component.refs.heatmap) {
-                console.log(`Adding ${geoJson.length} elements`)
-                var heatmap = component.refs.heatmap._heatmap
-                for (var i = 0; i < geoJson.length; i++) {
-                  // heatmap.add([geoJson[i].lat, geoJson[i].lon, geoJson[i].pop])
-                  heatmap.add(geoJson[i])
-                }
-                heatmap.draw()
-              }else {
-                console.log(`Adding ${geoJson.length} elements`)
-                component.setState(_.extend({}, component.state, {
-                  data: geoJson
-                }))
-              }*/
-
-            // geoJson.length > 0 && component.heatLayer.addArray(geoJson)
             }
           })
         }
@@ -91,12 +72,6 @@ export default class VectorLayer extends MapComponent {
     var map = this.context.map
     map._initPathRoot()
     this.heatmapLayer = new L.TileLayer.HeatmapTileLayer(`${BACKEND_URL}/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
-  // this.heatLayer = new HeatMapOverlay({
-  //   latField: 'lat',
-  //   lngField: 'lon',
-  //   valueField: 'pop'
-  // })
-  // map.addLayer(this.heatLayer)
   }
 
   componentWillUnmount (nextProps) {

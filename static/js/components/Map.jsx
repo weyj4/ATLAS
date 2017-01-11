@@ -1,24 +1,18 @@
+import L from 'leaflet'
+import * as _ from 'lodash'
 import React from 'react'
 import * as Leaflet from 'react-leaflet'
 import { Button, SafeAnchor } from 'react-bootstrap'
-import polylabel from 'polylabel'
-import LayerStore from 'atlas/stores/LayerStore'
-import VectorLayer from 'atlas/components/VectorLayer'
-import L from 'leaflet'
-import * as _ from 'lodash'
+
 import LocationStore from 'atlas/stores/LocationStore'
 import * as LocationActions from 'atlas/actions/LocationActions'
-import d3 from 'd3'
-import ZikaStore from 'atlas/stores/ZikaStore'
+import LayerStore from 'atlas/stores/LayerStore'
 import MapStore from 'atlas/stores/MapStore'
-import * as InstructionEditorActions from 'atlas/actions/InstructionEditorActions'
 import * as MessageActions from 'atlas/actions/MessageActions'
 import Heatmap from 'atlas/components/HeatMap'
 import CHW from 'atlas/components/CHW'
 
-import { INVISIBLE_COLOR, IDENTIFIABLE_COLOR, DELIVERABLE_COLOR, BACKEND_URL } from 'atlas/Constants'
-
-const DG_API_KEY = 'pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
+import { BACKEND_URL } from 'atlas/Constants'
 
 export default class Map extends React.Component {
 
@@ -62,24 +56,6 @@ export default class Map extends React.Component {
     )
   }
 
-  updateDate = () => {
-    var date = ZikaStore.getDate()
-    console.log(`${BACKEND_URL}/zika_layer_all&date=${date}`)
-    // MessageActions.setLoadingMsg(this.loadingMsg)
-    $.get(`${BACKEND_URL}/zika_layer_all?date=${date}`).done(result => {
-      console.log(result.features[10])
-      MapStore.addFeaturesToRTree(result)
-      // MessageActions.clearLoadingMsg()
-      this.setState(_.extend({}, this.state, {features: result}))
-    }).fail(err => {
-      console.log(err)
-    })
-
-    this.setState(_.extend({}, this.state, {
-      zikaDate: date
-    }))
-  }
-
   updateMarkers = () => {
     this.state.markers = MapStore.getMarkers()
     this.addMarkers()
@@ -90,8 +66,6 @@ export default class Map extends React.Component {
   }
 
   componentWillMount () {
-    // ZikaStore.on('change-dates', this.updateDate)
-    // ZikaStore.on('change-date-index', this.updateDate)
     LayerStore.on('change', this.updateLayerState)
     LayerStore.on('change-layer', this.updateLayer)
     LocationStore.on('change-location', this.updateLocation)
@@ -101,8 +75,6 @@ export default class Map extends React.Component {
   }
 
   componentWillUnmount () {
-    // ZikaStore.removeListener('change-dates', this.updateDate)
-    // ZikaStore.removeListener('change-date-index', this.updateDate)
     LayerStore.removeListener('change', this.updateLayerState)
     LayerStore.removeListener('change-layer', this.updateLayer)
     LocationStore.removeListener('change-location', this.updateLocation)
@@ -113,13 +85,11 @@ export default class Map extends React.Component {
   constructor () {
     super()
     this.markers = []
-    // ZikaStore.on('change-dates change-date-index', this.updateDate)
     this.state = {
       showLayer: LayerStore.getLayerStatus(),
       loc: LocationStore.getLocation(),
       layer: LayerStore.getLayer(),
       zoom: 15,
-      zikaDate: ZikaStore.getDate(),
       markers: [],
       showPopulation: false,//true,
       basemap: 'Satellite'
@@ -134,11 +104,6 @@ export default class Map extends React.Component {
         url: 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         attribution: '&copy; <a href="http://www.esri.com/">Esri</a> contributors'
       }
-
-    }
-
-    if (this.state.zikaDate) {
-      // this.updateDate()
     }
   }
 
@@ -197,10 +162,6 @@ export default class Map extends React.Component {
       var point = L.marker(marker.coordinates, {
         icon: icon
       }).addTo(map)
-
-      point.on('click', () => {
-        InstructionEditorActions.showEditor(marker)
-      })
 
       this.markers.push(point)
     })
