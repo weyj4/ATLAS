@@ -195,7 +195,6 @@ export default class Map extends React.Component {
           style={{width: '100%', height: '100%'}}
           scrollWheelZoom={false}
           onDragEnd={this.moveEnd}>
-          <CHW/>
           <Leaflet.TileLayer url={this.layers[this.state.basemap].url} attribution={this.layers[this.state.basemap].attribution} />
           {this.state.showPopulation ? 
             <Leaflet.TileLayer
@@ -203,6 +202,7 @@ export default class Map extends React.Component {
               opacity={0.5}
             /> : null
           }
+          <CHW/>
         </Leaflet.Map>
       </div>
     )

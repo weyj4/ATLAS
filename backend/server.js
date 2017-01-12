@@ -69,21 +69,12 @@ tilelive.load(`mapnik://${__dirname}/Heatmap.xml`, (err, source) => {
   }
 })
 
-
 app.get('/CHW', (req, res) => {
-  db.query('SELECT reported, hh_id, diag_cough, diag_fever, chw_id, visit_id, hh_lat as lat, hh_lon as lon FROM mock_data', (err, result) => {
+  db.query('SELECT lat, lon, label1, label2 FROM tula.markers', (err, result) => {
     if (err) {
-      throw(err)
+      res.status(500).send(err)
     }else {
-      var chws = {}
-      for (var i = 0; i < result.rows.length; i++) {
-        if (chws[result.rows[i].chw_id]) {
-          chws[result.rows[i].chw_id].push(result.rows[i])
-        }else {
-          chws[result.rows[i].chw_id] = [result.rows[i]]
-        }
-      }
-      res.json(chws)
+      res.json(result.rows)
     }
   })
 })
