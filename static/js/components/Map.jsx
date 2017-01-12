@@ -183,7 +183,7 @@ export default class Map extends React.Component {
         <SafeAnchor style={styles.baseLayerButton} onClick={this.toggleBasemap}>
           {this.state.basemap === 'Satellite' ? 'Street Map' : 'Satellite'}
         </SafeAnchor>
-        <Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 20}}>
+        <Button onClick={this.togglePop} style={{position: 'absolute', top: 20, right: 20, zIndex: 2000}}>
           {this.state.showPopulation ? 'Hide ' : 'Show '} Population
         </Button>
         <Leaflet.Map
@@ -211,7 +211,7 @@ export default class Map extends React.Component {
 
 const styles = {
   baseLayerButton: {
-    zIndex: 5,
+    zIndex: 2000,
     position: 'absolute',
     textDecoration: 'none',
     color: 'black',
