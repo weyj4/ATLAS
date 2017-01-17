@@ -3,7 +3,6 @@ import { MapComponent } from 'react-leaflet'
 import polylabel from 'polylabel'
 var L = require('leaflet')
 import MapStore from 'atlas/stores/MapStore'
-import { BACKEND_URL } from 'atlas/Constants'
 
 export default class VectorLayer extends MapComponent {
   static contextTypes = {
@@ -98,7 +97,7 @@ export default class VectorLayer extends MapComponent {
     // Add a fake GeoJSON line to coerce Leaflet into creating the <svg> tag that d3_geoJson needs
     this.fakeGeoJSON = new L.geoJson({'type': 'LineString','coordinates': [[0, 0], [0, 0]]}).addTo(map)
 
-    this.polyLayer = new L.TileLayer.d3_topoJSON(`${BACKEND_URL}/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
+    this.polyLayer = new L.TileLayer.d3_topoJSON(`/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
 
     this.tooltip = d3.select(this.context.map._container).append('div')
       .attr('class', 'hidden tooltip')

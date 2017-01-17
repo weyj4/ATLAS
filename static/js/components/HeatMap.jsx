@@ -3,7 +3,6 @@ import { MapComponent } from 'react-leaflet'
 var L = require('leaflet')
 import MapStore from 'atlas/stores/MapStore'
 import HeatmapLayer from 'react-leaflet-heatmap-layer'
-import { BACKEND_URL } from 'atlas/Constants'
 
 export default class VectorLayer extends MapComponent {
   static contextTypes = {
@@ -71,7 +70,7 @@ export default class VectorLayer extends MapComponent {
     })
     var map = this.context.map
     map._initPathRoot()
-    this.heatmapLayer = new L.TileLayer.HeatmapTileLayer(`${BACKEND_URL}/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
+    this.heatmapLayer = new L.TileLayer.HeatmapTileLayer(`/${this.props.endpoint}`, {layerName: 'blocks'}).addTo(map)
   }
 
   componentWillUnmount (nextProps) {

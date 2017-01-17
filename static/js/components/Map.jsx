@@ -12,8 +12,6 @@ import * as MessageActions from 'atlas/actions/MessageActions'
 import Heatmap from 'atlas/components/HeatMap'
 import CHW from 'atlas/components/CHW'
 
-import { BACKEND_URL } from 'atlas/Constants'
-
 export default class Map extends React.Component {
 
   updateLayerState = () => {
@@ -198,7 +196,7 @@ export default class Map extends React.Component {
           <Leaflet.TileLayer url={this.layers[this.state.basemap].url} attribution={this.layers[this.state.basemap].attribution} />
           {this.state.showPopulation ? 
             <Leaflet.TileLayer
-              url={`${BACKEND_URL}/pop_mb/{z}/{x}/{y}.png`}
+              url='/pop_mb/{z}/{x}/{y}.png'
               opacity={0.5}
             /> : null
           }

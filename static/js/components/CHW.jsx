@@ -1,5 +1,4 @@
 import React from 'react'
-import { BACKEND_URL } from 'atlas/Constants'
 import * as turf from 'turf'
 import * as _ from 'lodash'
 import L from 'leaflet'
@@ -56,7 +55,7 @@ export default class CHW extends React.Component {
 
   constructor () {
     super()
-    $.get(`${BACKEND_URL}/CHW`).done(res => {
+    $.get('/CHW').done(res => {
       this.addWorkers(res)
     }).fail(err => {
       console.log(err)
