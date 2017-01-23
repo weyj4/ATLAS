@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 import dispatcher from '../Dispatcher'
-import rtree from 'rtree'
 import turf from 'turf'
 import * as _ from 'lodash'
 
@@ -8,7 +7,6 @@ class MapStore extends EventEmitter {
   constructor () {
     super()
     this.markers = []
-    this.rtree = rtree()
   }
 
   getFeatures = () => {
@@ -26,26 +24,6 @@ class MapStore extends EventEmitter {
 
   getMarkers = () => {
     return this.markers
-  }
-
-  addFeaturesToRTree = (features) => {
-    this.rtree.geoJSON(features)
-  }
-
-  lookupRTree = (point) => {
-    var candidates = this.rtree.search({x: point.lng, y: point.lat, w: 0, h: 0})
-    var point = turf.point([point.lng, point.lat])
-    candidates = _.filter(candidates, p => turf.inside(point, p))
-
-    if (candidates.length != 1) {
-      return undefined
-    }else {
-      return candidates[0]
-    }
-  }
-
-  clearRTree = () => {
-    this.rtree = rtree()
   }
 
   containerPointToLatLng = (point) => {
