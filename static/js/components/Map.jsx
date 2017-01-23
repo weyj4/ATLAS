@@ -10,9 +10,6 @@ import d3 from 'd3';
 import _ from 'underscore';
 import LocationStore from 'atlas/stores/LocationStore';
 import * as LocationActions from 'atlas/actions/LocationActions';
-import {BACKEND_URL} from '../Constants'
-
-const DG_API_KEY='pk.eyJ1IjoiZGlnaXRhbGdsb2JlIiwiYSI6ImNpdGJ4cmxwdjA5MHcyenM2Ym1nZGw4azYifQ.Iz3NSorwN_1qiWdXKZaK9w'
 
 export default class Map extends React.Component{
 
@@ -70,7 +67,7 @@ export default class Map extends React.Component{
 
 	gotoHighestRisk = (event) => {
 		event.target.blur()
-		$.get(`${BACKEND_URL}/HighestRisk`).then((res) => {
+		$.get('/HighestRisk').then((res) => {
 			var temp = res[1]
 			res[1] = res[0];
 			res[0] = temp;
