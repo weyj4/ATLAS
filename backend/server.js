@@ -35,9 +35,6 @@ if (process.env.NODE_ENV !== 'production') {
   }))
 }
 
-// Serve static files from the Node.js server for now...
-app.use(express.static(__dirname + '/../static/'))
-
 var projection = new SphericalMercator({
   size: 256
 })
@@ -60,12 +57,19 @@ tilelive.load(`mapnik://${__dirname}/Heatmap.xml`, (err, source) => {
     app.get('/pop_mb/:z/:x/:y.png', (req, res) => {
       source.getTile(req.params.z, req.params.x, req.params.y, (err, tile, headers) => {
         if(err){
+          console.log(err)
           res.status(500).send(err)
         }else{
           res.send(tile)
         }
       })
     })
+    
+    app.use(express.static(__dirname + '/../static/'))
+
+    app.get('*', function (req, res) {
+      res.sendFile(path.join(__dirname, '../static/index.html'));
+    });
   }
 })
 
@@ -78,6 +82,8 @@ app.get('/CHW', (req, res) => {
     }
   })
 })
+
+
 
 app.listen(port, ip, function (err) {
   if (err) {
