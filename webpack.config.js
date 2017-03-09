@@ -4,7 +4,7 @@ var path = require('path');
 
 module.exports = {
   context: path.resolve(__dirname + '/'),
-  devtool: debug ? "inline-sourcemap" : null,
+  devtool: debug ? "inline-sourcemap" : false,
   entry: "./static/js/client.jsx",
   resolveLoader: {
     modules : ['node_modules']
