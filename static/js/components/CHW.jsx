@@ -30,12 +30,21 @@ export default class CHW extends React.Component {
 
     var map = this.context.map
 
+    const palette = {
+      Communidad : 'red',
+      'Puesto de salud' : 'blue',
+      'Centro de salud' : 'green',
+      ES : 'yellow',
+      TSR : 'orange',
+      AE : 'white'
+    }
+
     var x = L;
     this.workerLayer = L.geoJSON(workers, {
       pointToLayer : function(feature, latlng){
         return L.circleMarker(latlng, {
           radius: 6,
-          fillColor: 'yellow',
+          fillColor: palette[feature.properties.description],
           color: "#000",
           weight: 1,
           opacity: 1,
