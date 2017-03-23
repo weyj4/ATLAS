@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 import dispatcher from '../Dispatcher'
-import turf from 'turf'
 import * as _ from 'lodash'
 
 class MapStore extends EventEmitter {

@@ -1,5 +1,4 @@
 import React from 'react'
-import * as turf from 'turf'
 import * as _ from 'lodash'
 import L from 'leaflet'
 import * as d3 from 'd3'

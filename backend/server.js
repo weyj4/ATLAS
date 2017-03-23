@@ -2,7 +2,6 @@ require('dotenv').config({silent: true})
 var express = require('express')
 var path = require('path')
 var pg = require('pg')
-var SphericalMercator = require('sphericalmercator')
 var _ = require('lodash')
 var webpack = require('webpack')
 var webpackConfig = require('../webpack.config')
@@ -33,21 +32,6 @@ if (process.env.NODE_ENV !== 'production') {
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000
   }))
-}
-
-var projection = new SphericalMercator({
-  size: 256
-})
-
-// Compute the bounding box of a tile
-function getBBox (x, y, z) {
-  var tile = {}
-  tile.bounds = projection.bbox(x, y, z, false, '900913')
-  tile.bbox = `ST_SetSRID(ST_MakeBox2D(ST_MakePoint(${tile.bounds[0]},${tile.bounds[1]}), 
-ST_MakePoint(${tile.bounds[2]}, ${tile.bounds[3]})), 3857)`
-  tile.bbox_4326 = `ST_Transform(${tile.bbox}, 4326)`
-  tile.geom_hash = 'Substr(MD5(ST_AsBinary(the_geom)), 1, 10)'
-  return tile
 }
 
 tilelive.load(`mapnik://${__dirname}/Heatmap.xml`, (err, source) => {
