@@ -1,0 +1,79 @@
+{
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArnholdInstitute/ATLAS.git"
+  },
+  "version": "1.0.0",
+  "name": "atlas",
+  "description": "A comprehensive data engine for global health equity and security",
+  "author": "Matt Le",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-serverless-express": "^2.1.3",
+    "body-parser": "^1.17.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.2",
+    "file-loader": "^0.10.1",
+    "globals": "^9.16.0",
+    "history": "^3.0.0",
+    "immutability-helper": "^2.1.2",
+    "jquery": "^3.1.1",
+    "lodash": "^4.17.4",
+    "react": "^15.4.2",
+    "react-bootstrap": "^0.30.7",
+    "react-dom": "^15.4.2",
+    "react-router": "^3.0.2",
+    "react-router-bootstrap": "^0.23.1",
+    "redux-thunk": "^2.2.0",
+    "url-loader": "^0.5.8",
+    "webpack": "^2.2.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-jest": "^19.0.0",
+    "babel-loader": "^6.4.0",
+    "babel-plugin-react-html-attrs": "^2.0.0",
+    "babel-plugin-react-transform": "^2.0.2",
+    "babel-plugin-transform-class-properties": "^6.23.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "babel-runtime": "^6.23.0",
+    "codecov": "^1.0.1",
+    "css-loader": "^0.26.2",
+    "enzyme": "^2.7.1",
+    "flow-bin": "^0.41.0",
+    "jest": "^19.0.2",
+    "jest-cli": "^19.0.2",
+    "json-loader": "^0.5.4",
+    "react-addons-test-utils": "^15.4.2",
+    "react-redux": "^5.0.3",
+    "react-spinkit": "^2.1.1",
+    "react-test-renderer": "^15.4.2",
+    "redux": "^3.6.0",
+    "redux-logger": "^2.10.0",
+    "redux-promise-middleware": "^4.2.0",
+    "redux-router": "^2.1.2",
+    "sinon": "^1.17.7",
+    "style-loader": "^0.13.2",
+    "supertest": "^3.0.0",
+    "webpack-dev-middleware": "^1.10.1",
+    "webpack-dev-server": "^2.4.1",
+    "webpack-hot-middleware": "^2.17.1"
+  },
+  "scripts": {
+    "flow": "./node_modules/.bin/flow",
+    "start": "node app.js",
+    "dev": "NODE_ENV=dev node app.js",
+    "build": "./node_modules/.bin/webpack --progress",
+    "test": "./node_modules/.bin/jest --coverage",
+    "test-debug": "node debug --harmony ./node_modules/jest-cli/bin/jest.js --runInBand"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^.*[.](jpg|JPG|gif|GIF|png|PNG|less|LESS|css|CSS)$": "EmptyModule"
+    }
+  }
+}

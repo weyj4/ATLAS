@@ -1,0 +1,13 @@
+yarn.lock
+packaged-sam.yaml
+cloudformation.yaml
+.env
+.DS_Store
+npm-debug.log
+node_modules
+stormpath.yml
+test/coverage
+public/client.min.js
+coverage
+simple-proxy-api.yaml
+.env.decrypted
