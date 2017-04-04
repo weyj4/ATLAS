@@ -15,10 +15,12 @@ import promiseMiddleware from 'redux-promise-middleware';
 import thunk from 'redux-thunk'
 import ErrorReducer from './reducers/ErrorReducer'
 import PagesReducer from './reducers/PagesReducer'
+import MapReducer from './reducers/MapReducer'
 
 const store = createStore(combineReducers({
   errors : ErrorReducer,
-  pages : PagesReducer
+  pages : PagesReducer,
+  map : MapReducer
 }), {}, applyMiddleware(thunk, promiseMiddleware()))
 
 const app = document.getElementById('app')
