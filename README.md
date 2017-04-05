@@ -8,4 +8,4 @@
 
 
 [![Build Status](https://travis-ci.org/ArnholdInstitute/ATLAS.svg?branch=tula-salud)](https://travis-ci.org/ArnholdInstitute/ATLAS)
-
+[![codecov](https://codecov.io/gh/ArnholdInstitute/ATLAS/branch/tula-salud/graph/badge.svg)](https://codecov.io/gh/ArnholdInstitute/ATLAS)
