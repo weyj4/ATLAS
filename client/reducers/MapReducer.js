@@ -13,7 +13,7 @@ const initialState = {
 
 const reducer = (state = initialState, action) => {
 	switch(action.type){
-		case 'CHANGE_LOC':
+		case 'CHANGE_POS':
 			return {...state, pos : action.payload}
 		case 'CHANGE_ZOOM':
 			return {...state, zoom : action.payload}

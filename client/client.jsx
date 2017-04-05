@@ -11,20 +11,7 @@ import LandingPage from './pages/LandingPage'
 import MapPage from './pages/MapPage'
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import {Provider} from 'react-redux'
-import promiseMiddleware from 'redux-promise-middleware';
-import thunk from 'redux-thunk'
-import ErrorReducer from './reducers/ErrorReducer'
-import PagesReducer from './reducers/PagesReducer'
-import MapReducer from './reducers/MapReducer'
-import createLogger from 'redux-logger'
-
-var logger = createLogger()
-
-const store = createStore(combineReducers({
-  errors : ErrorReducer,
-  pages : PagesReducer,
-  map : MapReducer
-}), {}, applyMiddleware(thunk, promiseMiddleware(), logger))
+import {store} from './store'
 
 const app = document.getElementById('app')
 
