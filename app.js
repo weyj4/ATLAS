@@ -37,8 +37,8 @@ if (process.env.NODE_ENV === 'dev') {
   })  
 }
 
-// var routes = require('./backend/routes')
-// app.use('/', routes)
+var routes = require('./backend/routes')()
+app.use('/', routes)
 
 app.use(express.static(path.join(__dirname, '/public/')))
 

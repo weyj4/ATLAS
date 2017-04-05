@@ -18,12 +18,6 @@ const reduce = (state : State = initialState, action : Action) : State => {
     return {msg : action.payload}
   }
   switch(action.type){
-    case 'POST_RESPONSE_REJECTED':
-      return {msg : action.payload}
-    case 'FETCH_SURVEY_REJECTED':
-      return {msg : action.payload}
-    case 'FETCH_RESPONSES_REJECTED':
-      return {msg : action.payload}
     case 'SET_ERROR':
       return {msg : action.msg}
     case 'CLEAR_ERROR':

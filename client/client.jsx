@@ -16,12 +16,15 @@ import thunk from 'redux-thunk'
 import ErrorReducer from './reducers/ErrorReducer'
 import PagesReducer from './reducers/PagesReducer'
 import MapReducer from './reducers/MapReducer'
+import createLogger from 'redux-logger'
+
+var logger = createLogger()
 
 const store = createStore(combineReducers({
   errors : ErrorReducer,
   pages : PagesReducer,
   map : MapReducer
-}), {}, applyMiddleware(thunk, promiseMiddleware()))
+}), {}, applyMiddleware(thunk, promiseMiddleware(), logger))
 
 const app = document.getElementById('app')
 

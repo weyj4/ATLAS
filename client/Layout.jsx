@@ -6,10 +6,19 @@
 
 import React from 'react'
 import * as ErrorActions from './actions/ErrorActions'
+import * as MapActions from './actions/MapActions'
 import { Alert } from 'react-bootstrap'
 import {connect} from 'react-redux'
 
 export class Layout extends React.Component {
+
+  // Perform any app initialization here.  This component is always mounted
+  // when the app starts up and will never be remounted
+  componentWillMount(){
+    console.log('fetching markers')
+    this.props.fetchMarkers()
+  }
+
   render () {
     return (
       <div style={styles.container} id='layout-container' >
@@ -39,7 +48,8 @@ const mapStateToProps = (state : State) => ({
 })
 
 const mapDisptachToProps = dispatch => ({
-  clearError : () => dispatch(ErrorActions.clearError)
+  clearError : () => dispatch(ErrorActions.clearError),
+  fetchMarkers : () => dispatch(MapActions.fetchMarkers())
 })
 
 const styles = {
