@@ -3,25 +3,27 @@
 pg_isready -h localhost -p 5432
 
 if [ $? -ne 0 ]; then
-	echo "starting Postgres server..."
-	/etc/init.d/postgresql start
+        echo "starting Postgres server..."
+        /etc/init.d/postgresql start
 fi
 
 pg_isready -h localhost -p 5432
 while [ $? -ne 0 ]; do
-	echo "Waiting for postgres to start..."
-	sleep 1
-	pg_isready -h localhost -p 5432
+        echo "Waiting for postgres to start..."
+        sleep 1
+        /etc/init.d/postgresql start
+        pg_isready -h localhost -p 5432
 done
+
+sudo -u postgres psql -c "CREATE USER root WITH SUPERUSER CREATEDB CREATEROLE REPLICATION BYPASSRLS PASSWORD 'root';"
+
+sudo -u postgres createdb root
+
+createdb atlas
 
 psql atlas --command "CREATE EXTENSION postgis"
 
-psql atlas -c "SELECT COUNT(*) FROM tula.markers;"
-
-if [ $? -ne 0 ]; then
-	echo "Tula schema doesn't exist, creating..."
-	cat atlas.sql | psql atlas
-fi
+cat atlas.sql | psql atlas
 
 npm run build
 

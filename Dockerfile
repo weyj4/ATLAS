@@ -7,12 +7,6 @@ RUN apt-get update -y && \
 	apt-get install -y nodejs npm wget && \
 	mkdir -p /usr/src/app
 
-# Copy the source code to the /usr/src/app directory
-COPY . /usr/src/app
-
-# Set this as the working directory
-WORKDIR /usr/src/app
-
 # Create a `node` alias to `nodejs`
 RUN ln -s "$(which nodejs)" /usr/bin/node
 
@@ -20,22 +14,18 @@ RUN ln -s "$(which nodejs)" /usr/bin/node
 # RUN npm install --production
 
 # Install PostgreSQL
-RUN apt-get install -y postgresql && apt-get update && apt-get install -y postgis
+RUN apt-get install -y postgresql && apt-get update && apt-get install -y postgis sudo
 
-# Create the `root` user
-USER postgres
-RUN /etc/init.d/postgresql start && \
-    psql --command "CREATE USER root WITH SUPERUSER CREATEDB CREATEROLE REPLICATION BYPASSRLS PASSWORD 'root';" &&\
-    createdb root
+# Copy the source code to the /usr/src/app directory
+COPY . /usr/src/app
 
-USER root
-
-# Create the database
-RUN /etc/init.d/postgresql start && \
-	psql --command "CREATE DATABASE atlas;"
-
-RUN printf "DB_USER=root\nDB_PASSWORD=root" > .env
+# Set this as the working directory
+WORKDIR /usr/src/app
 
 RUN npm install
+
+RUN printf "DB_USER=root\nDB_PASSWORD=root" > /usr/src/app/.env
+
+EXPOSE 8080
 
 CMD /usr/src/app/start.sh
